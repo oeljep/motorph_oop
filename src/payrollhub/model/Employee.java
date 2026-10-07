@@ -1,5 +1,5 @@
 package src.payrollhub.model;
 
-public class Employee {
+public abstract class Employee {
 
 }
