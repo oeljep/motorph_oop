@@ -1,0 +1,16 @@
+leaveID,employeeID,type,startDate,endDate,status,reason
+L0001,10001,Vacation,2026-12-22,2026-12-26,APPROVED,Family holiday trip
+L0002,10002,Sick,2026-09-14,2026-09-15,APPROVED,Fever and flu
+L0003,10003,Emergency,2026-09-29,2026-09-29,APPROVED,Burst water pipe at home
+L0004,10004,Vacation,2026-11-02,2026-11-06,PENDING,Visiting relatives in the province
+L0005,10005,Sick,2026-10-12,2026-10-13,PENDING,Dental surgery recovery
+L0006,10006,Personal,2026-10-20,2026-10-20,REJECTED,Errand during payroll cut-off
+L0007,10007,Vacation,2026-12-28,2026-12-31,PENDING,Year-end break
+L0008,10008,Emergency,2026-10-08,2026-10-09,APPROVED,"Family emergency, hospital visit"
+L0009,10009,Sick,2026-08-17,2026-08-19,APPROVED,Food poisoning
+L0010,10010,Vacation,2026-11-16,2026-11-20,REJECTED,"Requested during peak period, understaffed"
+L0011,10011,Personal,2026-11-09,2026-11-09,PENDING,Renewal of passport
+L0012,10012,Sick,2026-10-05,2026-10-07,APPROVED,Migraine and rest
+L0013,10013,Vacation,2027-01-04,2027-01-08,PENDING,Planned beach trip
+L0014,10014,Emergency,2026-10-14,2026-10-14,PENDING,Typhoon damage at residence
+L0015,10015,Personal,2026-09-22,2026-09-22,APPROVED,Child's school enrollment
