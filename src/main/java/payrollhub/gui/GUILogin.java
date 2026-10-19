@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package com.mycompany.mphpayroll;
+package payrollhub.gui;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -204,15 +204,21 @@ public void currentDate(){
  
                     if (jc_level.getSelectedItem().equals("Admin")) {
 
-                        admindashboard nextForm = new admindashboard(empID);
-                        nextForm.setVisible(true);
+                        /*admindashboard nextForm = new admindashboard(empID);
+                        nextForm.setVisible(true);*/
                     
                     } else if (jc_level.getSelectedItem().equals("Employee")) {
                 
-                        admindashboard nextForm = new admindashboard(empID);
-                        nextForm.setVisible(true);    
+                        GUIEmpDashTimesheet nextForm = new GUIEmpDashTimesheet(empID);
+                        nextForm.setVisible(true);   
+                        
+                    } else if (jc_level.getSelectedItem().equals("Employee")) {
+                
+                        GUIEmpDashTimesheet nextForm = new GUIEmpDashTimesheet(empID);
+                        nextForm.setVisible(true);   
+                        
+                    }
                     
-                }
             }else {
                 
                 JOptionPane.showMessageDialog(this,"Invalid Username or Password!");
