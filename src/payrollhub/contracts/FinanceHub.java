@@ -1,4 +1,4 @@
-package src.payrollhub.contracts;
+package payrollhub.contracts;
 
 public class FinanceHub {
 
