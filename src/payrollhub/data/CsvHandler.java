@@ -1,4 +1,4 @@
-package src.payrollhub.data;
+package payrollhub.data;
 
 import java.io.FileReader;
 import java.io.IOException;
