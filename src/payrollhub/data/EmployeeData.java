@@ -77,7 +77,7 @@ public class EmployeeData {
                     + " fields, got " + row.length);
         }
         return new EmployeeData(
-                row[0], row[1], row[2],
+                Integer.parseInt(row[0]), row[1], row[2],
                 LocalDate.parse(row[3]), row[4], row[5],
                 row[6], row[7], row[8], row[9],
                 row[10], row[11], row[12],

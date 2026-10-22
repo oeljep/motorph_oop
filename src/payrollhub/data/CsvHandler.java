@@ -1,6 +1,5 @@
 package payrollhub.data;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -9,12 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 
-import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -253,7 +250,7 @@ public final class CsvHandler {
 
     public static Optional<EmployeeData> findEmployee(int empNo) throws IOException {
         for (EmployeeData e : loadEmployees()) {
-            if (e.getEmpNo().equals(empNo))
+            if (e.getEmpNo() == empNo)
                 return Optional.of(e);
         }
         return Optional.empty();
@@ -292,7 +289,7 @@ public final class CsvHandler {
      */
     public static void saveEmployee(Path path, EmployeeData employee) throws IOException {
         List<String[]> rows = readAll(path);
-        if (indexOfKey(rows, employee.getEmpNo()) >= 0) {
+        if (indexOfKey(rows, String.valueOf(employee.getEmpNo())) >= 0) {
             throw new IllegalArgumentException(
                     "Employee number " + employee.getEmpNo() + " already exists.");
         }
@@ -307,7 +304,7 @@ public final class CsvHandler {
     /** Replaces the row with the same empNo. Returns false if not found. */
     public static boolean updateEmployee(Path path, EmployeeData employee) throws IOException {
         List<String[]> rows = readAll(path);
-        int index = indexOfKey(rows, employee.getEmpNo());
+        int index = indexOfKey(rows, String.valueOf(employee.getEmpNo()));
         if (index < 0)
             return false;
         rows.set(index, employee.toCsvRow());
@@ -388,5 +385,26 @@ public final class CsvHandler {
         }
         return new ArrayList<>(months);
     }
+
+    // =====================================================================
+    // users.csv
+    // =====================================================================
+
+    /**
+     * Checks a login against users.csv (empNo,userName,password,role).
+     * Returns the matching row, or empty if the credentials do not match.
+     */
+
+    public static Optional<String[]> authenticate(String username, String password)
+        throws IOException {
+            for (String[] row : readAll(USERS_FILE)) {
+                if (row.length >= 4
+                        && row[1].equalsIgnoreCase(username)
+                        && row[2].equals(password)) {
+                    return Optional.of(row);
+                }
+            }
+            return Optional.empty();
+        }
 
 }

@@ -23,7 +23,7 @@ Reference for the CSV files in `data/`. All reading and writing goes through `Cs
 
 | # | Column | Type | Required | Notes |
 |---|---|---|---|---|
-| 1 | employeeId | String | Yes | Unique key |
+| 1 | empNo | int | Yes | Unique key |
 | 2 | lastName | String | Yes | |
 | 3 | firstName | String | Yes | |
 | 4 | birthday | LocalDate | Yes | `yyyy-MM-dd`; must not be in the future |
