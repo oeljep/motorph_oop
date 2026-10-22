@@ -1,4 +1,4 @@
-package src.payrollhub;
+package payrollhub;
 
 public class Main {
 

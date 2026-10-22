@@ -1,4 +1,4 @@
-package src.payrollhub.gui;
+package payrollhub.gui;
 
 public class GUIUtility {
 

@@ -1,4 +1,4 @@
-package src.payrollhub.model;
+package payrollhub.model;
 
 public class Attendance {
 

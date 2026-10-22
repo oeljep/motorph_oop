@@ -1,4 +1,4 @@
-package src.payrollhub.data;
+package payrollhub.data;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -251,7 +251,7 @@ public final class CsvHandler {
         return employees;
     }
 
-    public static Optional<EmployeeData> findEmployee(String empNo) throws IOException {
+    public static Optional<EmployeeData> findEmployee(int empNo) throws IOException {
         for (EmployeeData e : loadEmployees()) {
             if (e.getEmpNo().equals(empNo))
                 return Optional.of(e);
