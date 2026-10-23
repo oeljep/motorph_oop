@@ -7,16 +7,13 @@ package payrollhub.gui;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import java.util.List;
-import java.util.*;
-import java.awt.*;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import javax.swing.*;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
+import others.currentDate;
+import others.currentTime;
 
 
 
@@ -27,26 +24,15 @@ public class GUILogin extends javax.swing.JFrame {
      */
     public GUILogin() {
         initComponents();
-        currentDate();
+        
+        currentDate CurrentDate = new currentDate();
+        currentTime CurrentTime = new currentTime();
+        
+        date.setText(CurrentDate.getDate());
+        
+        time.setText(CurrentTime.getTime());
+        
     }
-public void currentDate(){
-    
-    //Date and Time Method
-    
-    Calendar cal = new GregorianCalendar();
-    int month = cal.get(Calendar.MONTH);
-    int day = cal.get(Calendar.DAY_OF_MONTH);
-    int year = cal.get(Calendar.YEAR);
-    
-    date.setText("("+(month+1)+"/"+day+"/"+year+")");
-    
-    int second = cal.get(Calendar.SECOND);
-    int minute = cal.get(Calendar.MINUTE);
-    int hour = cal.get(Calendar.HOUR);
-    
-    time.setText(hour+":"+minute+":"+second);
-
-}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -68,8 +54,6 @@ public void currentDate(){
         text_user = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
         date = new javax.swing.JMenu();
         time = new javax.swing.JMenu();
 
@@ -85,7 +69,7 @@ public void currentDate(){
             }
         });
         getContentPane().add(jb_login, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 380, 180, -1));
-        getContentPane().add(text_password, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 290, 160, -1));
+        getContentPane().add(text_password, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 260, 160, -1));
 
         jb_login1.setText("LOG IN");
         jb_login1.addActionListener(new java.awt.event.ActionListener() {
@@ -93,56 +77,44 @@ public void currentDate(){
                 jb_login1ActionPerformed(evt);
             }
         });
-        getContentPane().add(jb_login1, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 350, 80, -1));
+        getContentPane().add(jb_login1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 350, 180, -1));
 
-        jc_level.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Admin", "Employee" }));
+        jc_level.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Regular", "HumanResources", "Accounting", "Chief" }));
         jc_level.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jc_levelActionPerformed(evt);
             }
         });
-        getContentPane().add(jc_level, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 350, -1, -1));
+        getContentPane().add(jc_level, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 320, 180, -1));
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("POSITION");
-        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 330, -1, -1));
+        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 300, 90, -1));
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("PASSWORD");
-        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
+        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 240, -1, -1));
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("EMPLOYEE NO.");
-        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, -1, -1));
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, -1, -1));
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setText("Employee Number and Password");
-        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 170, -1, -1));
+        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 140, -1, -1));
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Please Enter your");
-        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 150, -1, -1));
-        getContentPane().add(text_user, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, 160, -1));
+        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 120, -1, -1));
+        getContentPane().add(text_user, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 200, 160, -1));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(System.getProperty("user.dir")+("\\src\\main\\java\\com\\mycompany\\mphpayroll\\Images\\login.jpg")));
+        jLabel1.setIcon(new javax.swing.ImageIcon(System.getProperty("user.dir")+("\\src\\main\\java\\Images\\login.jpg")));
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 500, 430));
-
-        jMenu1.setText("File");
-
-        jMenuItem1.setText("EXIT");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
-            }
-        });
-        jMenu1.add(jMenuItem1);
-
-        jMenuBar1.add(jMenu1);
 
         date.setText("Date");
         jMenuBar1.add(date);
@@ -154,12 +126,6 @@ public void currentDate(){
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-     
-        
-        
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jc_levelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jc_levelActionPerformed
         // TODO add your handling code here:
@@ -283,9 +249,7 @@ public void currentDate(){
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JButton jb_login;
     private javax.swing.JButton jb_login1;
     private javax.swing.JComboBox<String> jc_level;

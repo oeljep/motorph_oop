@@ -25,14 +25,12 @@ import payrollhub.service.LogoutHandler;
  */
 public class GUIEmpDashTimesheet extends javax.swing.JFrame {
     
-    private final DateTimeFormatter clockFormat = DateTimeFormatter.ofPattern("hh:mm:ss a");
+    private final DateTimeFormatter Format = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a");
+    
+    private LocalDateTime timeIn;
+    
+    private LocalDateTime timeOut;
 
-    private final DateTimeFormatter timeInFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a");
-
-
-    /**
-     * Creates new form emppage
-     */
     public GUIEmpDashTimesheet() {
         initComponents();
         
@@ -40,7 +38,7 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
 
         Timer clockTimer = new Timer(1000, e -> {
             jl_timeDisplay.setText(
-            LocalDateTime.now().format(clockFormat)
+            LocalDateTime.now().format(Format)
         );
     });
 
@@ -49,10 +47,10 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
         
     }
 
-    GUIEmpDashTimesheet(String empID) throws IOException, FileNotFoundException, CsvException {
+    GUIEmpDashTimesheet(String employeeID) throws IOException, FileNotFoundException, CsvException {
         initComponents();
         
-        text_id.setText(empID);
+        text_id.setText(employeeID);
         
         readEmployeeData();
         
@@ -61,7 +59,7 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
     
     private void readEmployeeData() throws FileNotFoundException, IOException, CsvException{
         
-        String csvFile = "mphdetails.csv";
+        String csvFile = "employee.csv";
         String empid = text_id.getText().trim();
         boolean empdata = false;
         
@@ -101,8 +99,8 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
         text_position = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jl_timeDisplay = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        jb_timeOut = new javax.swing.JButton();
+        jb_timeIn = new javax.swing.JButton();
         jt_timeView = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
@@ -181,14 +179,23 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
         jl_timeDisplay.setToolTipText("");
         jl_timeDisplay.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255), 2));
 
-        jButton1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton1.setText("TIME - OUT");
+        jb_timeOut.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jb_timeOut.setText("TIME - OUT");
+        jb_timeOut.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jb_timeOutActionPerformed(evt);
+            }
+        });
 
-        jButton2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton2.setText("TIME - IN");
+        jb_timeIn.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jb_timeIn.setText("TIME - IN");
+        jb_timeIn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jb_timeInActionPerformed(evt);
+            }
+        });
 
         jTable1.setAutoCreateRowSorter(true);
-        jTable1.setBackground(new java.awt.Color(0, 0, 0));
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -216,9 +223,9 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jt_timeView, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jb_timeIn, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)))))
+                                .addComponent(jb_timeOut, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)))))
                 .addGap(37, 37, 37))
         );
         jPanel2Layout.setVerticalGroup(
@@ -231,8 +238,8 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
                         .addComponent(jt_timeView, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jb_timeOut, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jb_timeIn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(33, 33, 33)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
                 .addContainerGap())
@@ -366,6 +373,22 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jb_empDashTimesheetActionPerformed
 
+    private void jb_timeInActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_timeInActionPerformed
+            
+        timeIn = LocalDateTime.now();
+        
+        jt_timeView.setText(timeIn.format(Format));
+
+    }//GEN-LAST:event_jb_timeInActionPerformed
+
+    private void jb_timeOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_timeOutActionPerformed
+        
+        timeOut = LocalDateTime.now();
+        
+        jt_timeView.setText(timeOut.format(Format));
+        
+    }//GEN-LAST:event_jb_timeOutActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -417,8 +440,6 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JMenu jMenu1;
@@ -436,6 +457,8 @@ public class GUIEmpDashTimesheet extends javax.swing.JFrame {
     private javax.swing.JButton jb_empDashPayslip;
     private javax.swing.JButton jb_empDashSignout;
     private javax.swing.JButton jb_empDashTimesheet;
+    private javax.swing.JButton jb_timeIn;
+    private javax.swing.JButton jb_timeOut;
     private javax.swing.JLabel jl_timeDisplay;
     private javax.swing.JTextField jt_timeView;
     private javax.swing.JTextField text_id;
