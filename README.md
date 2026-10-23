@@ -44,7 +44,7 @@ The design package (CRC cards and Method Dictionary) is organized by OOP pillar.
 PayrollHub/
 ├── src/
 │   └── payrollhub/
-│       ├── PayrollSystem.java        # Controller: start, login, dashboard routing, logout, exit
+│       ├── Main.java        # Controller: start, login, dashboard routing, logout, exit
 │       ├── model/                    # Employee hierarchy and domain objects
 │       │   ├── Employee.java
 │       │   ├── Admin.java

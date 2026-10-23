@@ -21,7 +21,7 @@ public class EmployeeData {
 
     public static final int FIELD_COUNT = 17;
 
-    private String empNo;
+    private int empNo;
     private String lastName;
     private String firstName;
     private LocalDate birthday;
@@ -39,7 +39,7 @@ public class EmployeeData {
     private double phoneAllowance;
     private double clothingAllowance;
 
-    public EmployeeData(String empNo, String lastName, String firstName,
+    public EmployeeData(int empNo, String lastName, String firstName,
             LocalDate birthday, String address, String phone,
             String sss, String philhealth, String tin, String pagibig,
             String status, String position, String supervisor,
@@ -77,7 +77,7 @@ public class EmployeeData {
                     + " fields, got " + row.length);
         }
         return new EmployeeData(
-                row[0], row[1], row[2],
+                Integer.parseInt(row[0]), row[1], row[2],
                 LocalDate.parse(row[3]), row[4], row[5],
                 row[6], row[7], row[8], row[9],
                 row[10], row[11], row[12],
@@ -92,8 +92,8 @@ public class EmployeeData {
      * employee.csv header.
      */
     public String[] toCsvRow() {
-        return new String[]{
-                empNo, lastName, firstName,
+        return new String[] {
+                Integer.toString(empNo), lastName, firstName,
                 birthday.toString(), address, phone,
                 sss, philhealth, tin, pagibig,
                 status, position, supervisor,
@@ -105,44 +105,140 @@ public class EmployeeData {
     }
 
     // ---------------------- Getters ----------------------
-    public String getEmpNo()            { return empNo;}
-    public String getLastName()         { return lastName;}
-    public String getFirstName()        { return firstName;}
-    public LocalDate getBirthday()      { return birthday;}
-    public String getAddress()          { return address;}
-    public String getPhone()            { return phone;}
-    public String getSss()              { return sss;}
-    public String getPhilhealth()       { return philhealth;}
-    public String getTin()              { return tin;}
-    public String getPagibig()          { return pagibig;}
-    public String getStatus()           { return status;}
-    public String getPosition()         { return position;}
-    public String getSupervisor()       { return supervisor;}
-    public double getBasicSalary()      { return basicSalary;}
-    public double getRiceSubsidy()      { return riceSubsidy;}
-    public double getPhoneAllowance()   { return phoneAllowance;}
-    public double getClothingAllowance(){ return clothingAllowance;}
-    public String getFullName()         { return firstName + " " + lastName; }
+    public int getEmpNo() {
+        return empNo;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getSss() {
+        return sss;
+    }
+
+    public String getPhilhealth() {
+        return philhealth;
+    }
+
+    public String getTin() {
+        return tin;
+    }
+
+    public String getPagibig() {
+        return pagibig;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public String getSupervisor() {
+        return supervisor;
+    }
+
+    public double getBasicSalary() {
+        return basicSalary;
+    }
+
+    public double getRiceSubsidy() {
+        return riceSubsidy;
+    }
+
+    public double getPhoneAllowance() {
+        return phoneAllowance;
+    }
+
+    public double getClothingAllowance() {
+        return clothingAllowance;
+    }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 
     // ---------------------- Setters ----------------------
-    public void setEmpNo(String empNo)                 { this.empNo = requireText(empNo, "Employee No.");}
-    public void setLastName(String lastName)           { this.lastName = requireText(lastName, "Last Name");}
-    public void setFirstName(String firstName)         { this.firstName = requireText(firstName, "First Name");}
-    public void setPosition(String position)            { this.position = requireText(position, "Position");}
-    public void setStatus(String status)                { this.status = requireText(status, "Status");}
-    public void setAddress(String address)             { this.address = requireDigits(address, "Address");}
-    public void setPhone(String phone)                 { this.phone = requireDigits(phone, "Phone Number");}
-    public void setSss(String sss)                      { this.sss = requireDigits(sss, "SSS");}
-    public void setPhilhealth(String philhealth)        { this.philhealth = requireDigits(philhealth, "PhilHealth");}
-    public void setTin(String tin)                      { this.tin = requireDigits(tin, "TIN");}
-    public void setPagibig(String pagibig)              { this.pagibig = requireDigits(pagibig, "Pag-ibig");}
-    
-    public void setBasicSalary(double basicSalary)      { this.basicSalary = requirePositive(basicSalary, "Basic Salary");}
-    public void setRiceSubsidy(double riceSubsidy)      { this.riceSubsidy = requirePositive(riceSubsidy, "Rice Subsidy");}
-    public void setPhoneAllowance(double phoneAllowance) { this.phoneAllowance = requirePositive(phoneAllowance, "Phone Allowance");}
-    public void setClothingAllowance(double clothingAllowance){ this.clothingAllowance = requirePositive(clothingAllowance, "Clothing Allowance");}
-    
-    public void setBirthday(LocalDate birthday) { 
+    public void setEmpNo(int empNo) {
+        this.empNo = empNo;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = requireText(lastName, "Last Name");
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = requireText(firstName, "First Name");
+    }
+
+    public void setPosition(String position) {
+        this.position = requireText(position, "Position");
+    }
+
+    public void setStatus(String status) {
+        this.status = requireText(status, "Status");
+    }
+
+    public void setAddress(String address) {
+        this.address = requireDigits(address, "Address");
+    }
+
+    public void setPhone(String phone) {
+        this.phone = requireDigits(phone, "Phone Number");
+    }
+
+    public void setSss(String sss) {
+        this.sss = requireDigits(sss, "SSS");
+    }
+
+    public void setPhilhealth(String philhealth) {
+        this.philhealth = requireDigits(philhealth, "PhilHealth");
+    }
+
+    public void setTin(String tin) {
+        this.tin = requireDigits(tin, "TIN");
+    }
+
+    public void setPagibig(String pagibig) {
+        this.pagibig = requireDigits(pagibig, "Pag-ibig");
+    }
+
+    public void setBasicSalary(double basicSalary) {
+        this.basicSalary = requirePositive(basicSalary, "Basic Salary");
+    }
+
+    public void setRiceSubsidy(double riceSubsidy) {
+        this.riceSubsidy = requirePositive(riceSubsidy, "Rice Subsidy");
+    }
+
+    public void setPhoneAllowance(double phoneAllowance) {
+        this.phoneAllowance = requirePositive(phoneAllowance, "Phone Allowance");
+    }
+
+    public void setClothingAllowance(double clothingAllowance) {
+        this.clothingAllowance = requirePositive(clothingAllowance, "Clothing Allowance");
+    }
+
+    public void setBirthday(LocalDate birthday) {
         if (birthday == null) {
             throw new IllegalArgumentException("Birthday is required");
         }
@@ -152,9 +248,9 @@ public class EmployeeData {
         this.birthday = birthday;
     }
 
-        public void setSupervisor(String supervisor) { 
-            this.supervisor = supervisor == null ? "" : supervisor.trim();
-        }
+    public void setSupervisor(String supervisor) {
+        this.supervisor = supervisor == null ? "" : supervisor.trim();
+    }
 
     // ---------------------- Validation helpers ----------------------
     private String requireText(String value, String fieldName) {
@@ -190,13 +286,14 @@ public class EmployeeData {
         }
         return Double.parseDouble(cleaned);
     }
- 
+
     /** Writes 90000.0 as "90000" and 1234.5 as "1234.5". */
     private static String formatMoney(double value) {
-        if (value == Math.rint(value)) return String.valueOf((long) value);
+        if (value == Math.rint(value))
+            return String.valueOf((long) value);
         return String.valueOf(value);
     }
- 
+
     @Override
     public String toString() {
         return empNo + " - " + lastName + ", " + firstName + " (" + position + ")";
