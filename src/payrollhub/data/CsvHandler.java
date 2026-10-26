@@ -18,7 +18,7 @@ import javax.swing.table.DefaultTableModel;
  * The only class that reads or writes the CSV files. No screen parses CSV
  * itself. All methods are static and the class holds no state.
  *
- * Files (in the data folder):
+ * Files (in src/data):
  * employee.csv empNo,lastName,firstName,birthday,address,phone,sss,philhealth,
  * tin,pagibig,status,position,supervisor,basicSalary,riceSubsidy,
  * phoneAllowance,clothingAllowance
@@ -29,7 +29,7 @@ import javax.swing.table.DefaultTableModel;
 
 public final class CsvHandler {
 
-    public static final Path DATA_DIR = Paths.get("data");
+    public static final Path DATA_DIR = Paths.get("src", "data");
     public static final Path EMPLOYEE_FILE = DATA_DIR.resolve("employee.csv");
     public static final Path ATTENDANCE_FILE = DATA_DIR.resolve("attendance.csv");
     public static final Path USERS_FILE = DATA_DIR.resolve("users.csv");
@@ -249,7 +249,11 @@ public final class CsvHandler {
     }
 
     public static Optional<EmployeeData> findEmployee(int empNo) throws IOException {
-        for (EmployeeData e : loadEmployees()) {
+        return findEmployee(EMPLOYEE_FILE, empNo);
+    }
+
+    public static Optional<EmployeeData> findEmployee(Path path, int empNo) throws IOException {
+        for (EmployeeData e : loadEmployees(path)) {
             if (e.getEmpNo() == empNo)
                 return Optional.of(e);
         }
@@ -396,15 +400,20 @@ public final class CsvHandler {
      */
 
     public static Optional<String[]> authenticate(String username, String password)
-        throws IOException {
-            for (String[] row : readAll(USERS_FILE)) {
-                if (row.length >= 4
-                        && row[1].equalsIgnoreCase(username)
-                        && row[2].equals(password)) {
-                    return Optional.of(row);
-                }
+            throws IOException {
+        return authenticate(USERS_FILE, username, password);
+    }
+
+    public static Optional<String[]> authenticate(Path usersFile, String username, String password)
+            throws IOException {
+        for (String[] row : readAll(usersFile)) {
+            if (row.length >= 4
+                    && row[1].equalsIgnoreCase(username)
+                    && row[2].equals(password)) {
+                return Optional.of(row);
             }
-            return Optional.empty();
         }
+        return Optional.empty();
+    }
 
 }

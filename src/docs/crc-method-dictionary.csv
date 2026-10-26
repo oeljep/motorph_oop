@@ -1,0 +1,371 @@
+,,,,,,,
+,MO-IT110 Object-Oriented Programming,,,,,,
+,Method Dictionary,,,,,,
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Employee,getEmpNo,To provide read-only access to the employee’s unique employee number for identification and record linkage,public,none,int,None
+,Employee,setEmpNo,To assign or update the employee’s unique employee number while ensuring it is valid and non-empty,public,int empNo,void,empNo must be greater than 0
+,Employee,getLastName,"To retrieve the employee’s last name for display, reporting, and identification purposes.",public,none,String,None
+,Employee,setLastName,To update the employee’s last name while enforcing valid name input rules.,public,String lastName (the employee’s last name),void,"-lastName must not be null
+-lastName must not be empty
+-lastName must not contain numeric characters"
+,Employee,getFirstName,"To retrieve the employee’s first name for display, reporting, and identification purposes.",public,None,String,None
+,Employee,setFirstName,To update the employee’s first name while ensuring it follows valid naming conventions.,public,String firstName (the employee’s first name),void,"-firstName must not be null
+-firstName must not be empty
+-firstName must not contain numeric characters
+-Leading and trailing whitespace should be trimmed"
+,Employee,getBirthday,"To retrieve the employee’s date of birth for identification, age-related checks, and record display.",public,None,LocalDate,None
+,Employee,setBirthday,To assign or update the employee’s date of birth while ensuring the date is valid and not set in the future.,public,LocalDate birthday (the employee’s date of birth),void,"-birthday must not be null
+-birthday must not be a future date"
+,Employee,getAddress,To retrieve the employee’s residential address for contact and record-keeping purposes.,public,None,String,None
+,Employee,setAddress,To update the employee’s address while ensuring the input is valid and properly formatted.,public,String address (the employee’s residential address),void,"-address must not be null
+-address must not be empty
+-Leading and trailing whitespace should be trimmed"
+,Employee,getPhone,To retrieve the employee’s contact phone number for communication and record verification purposes.,public,None,String,None
+,Employee,setPhone,To update the employee’s contact phone number while ensuring it follows a valid phone number format.,public,String phone (the employee’s contact phone number),void,"-phone must not be null
+-phone must not be empty
+-phone must contain digits only (or match a defined phone pattern)
+-phone length must fall within a valid range (10–15 digits)
+-Leading and trailing whitespace should be trimmed"
+,Employee,getSss,To retrieve the employee’s SSS (Social Security System) number for payroll and statutory contribution processing.,public,None,String,None
+,Employee,setSss,To assign or update the employee’s SSS (Social Security System) number while ensuring it follows valid formatting rules.,public,String sss (the employee’s SSS number),void,"-sss must not be null
+-sss must not be empty
+-sss must contain digits only
+-sss must follow the required SSS number length (10 digits)"
+,Employee,getPhilhealth,To retrieve the employee’s PhilHealth number for statutory contribution and payroll processing.,public,None,String,None
+,Employee,setPhilhealth,To assign or update the employee’s PhilHealth number while ensuring it meets valid format requirements.,public,String philhealth (the employee’s PhilHealth number),void,"-philhealth must not be null
+-philhealth must not be empty
+-philhealth must contain digits only
+-philhealth must follow the required PhilHealth number length
+-Leading and trailing whitespace should be trimmed"
+,Employee,getTin,To retrieve the employee’s TIN (Tax Identification Number) for tax computation and reporting purposes.,public,None,String,None
+,Employee,setTin,To assign or update the employee’s TIN while ensuring it follows valid formatting rules.,public,String tin (the employee’s Tax Identification Number),void,"-tin must not be null
+-tin must not be empty
+-tin must contain digits only
+-tin must follow the required TIN number length
+-Leading and trailing whitespace should be trimmed"
+,Employee,getPagibig,To retrieve the employee’s Pag-IBIG number for statutory contribution and payroll processing.,public,None,String,None
+,Employee,setPagibig,To assign or update the employee’s Pag-IBIG number while ensuring it meets valid format requirements.,public,String pagibig (the employee’s Pag-IBIG number),void,"-pagibig must not be null
+-pagibig must not be empty
+-pagibig must contain digits only
+-pagibig must follow the required Pag-IBIG number length
+-Leading and trailing whitespace should be trimmed"
+,Employee,getStatus,"Retrieves the current employment classification (Probationary, Regular).",public,None,String,Allows the Payroll system to identify the employee's current standing.
+,Employee,setStatus,To update the status of employee if they are regular or probationary,protected,String status,void,Updates employment classification (Probationary/Regular).
+,Employee,getPosition,To retrieve the employee’s job position for role identification and organizational reporting.,public,None,String,None
+,Employee,setPosition,To assign or update the employee’s job position while ensuring the value is valid and meaningful.,public,String position (the employee’s job title or position),void,"-position must not be null
+-position must not be empty
+-Leading and trailing whitespace should be trimmed"
+,Employee,getSupervisor,To retrieve the employee’s supervisor information for organizational hierarchy and approval workflows.,public,None,String,None
+,Employee,setSupervisor,To assign or update the employee’s supervisor while ensuring the supervisor reference is valid and does not violate organizational rules.,public,String supervisorId,void,"-supervisorId must not be null
+-supervisorId must not be empty
+-supervisorId must refer to an existing employee"
+,Employee,getBasicSalary,To retrieve the employee’s basic salary for payroll calculation and reporting.,public,None,double,None
+,Employee,setBasicSalary,To assign or update the employee’s basic salary while ensuring it meets valid payroll constraints.,protected,double amount,void,Internal Firewall: Changes go through FinanceHub.updateSalaryRates
+,Employee,getRiceSubsidy,To retrieve the employee’s rice subsidy allowance for payroll computation.,public,None,double,None
+,Employee,setRiceSubsidy,To assign or update the employee’s rice subsidy allowance while ensuring it is non-negative.,protected,double riceSubsidy (the rice subsidy allowance amount),void,riceSubsidy must be greater than or equal to 0
+,Employee,getPhoneAllowance,To retrieve the employee’s phone allowance for payroll calculation and benefits display.,public,None,double,None
+,Employee,setPhoneAllowance,To assign or update the employee’s phone allowance while ensuring the value is valid for payroll computation.,protected,double phoneAllowance (the phone allowance amount),void,phoneAllowance must be greater than or equal to 0
+,Employee,getClothingAllowance,To retrieve the employee’s clothing allowance for payroll calculation and benefits reporting.,public,None,double,None
+,Employee,setClothingAllowance,To assign or update the employee’s clothing allowance while ensuring the value is non-negative.,protected,double clothingAllowance (the clothing allowance amount),void,clothingAllowance must be greater than or equal to 0
+,Employee,CalculatePay,Abstract contract for payroll.,public,none,double,Abstraction: Marked abstract in Parent; logic is hidden from the Controller.
+,Employee,computeSSS,Shared Logic: Calculates SSS deduction based on gross income.,public,double gross,double,PayrollProcessor: Shared logic to ensure statutory compliance.
+,Employee,computePhilHealth,Shared Logic: Calculates PhilHealth share based on basic pay.,public,double basicSalary,double,PayrollProcessor: Standardized math shared by all children.
+,Employee,logout,Abstract Override: Safely clears the session to prevent data leakage.,public,String token,void,Abstract Override: Clears currentUser global state and resets security context.
+,Employee,isPasswordValid,"Abstract Override: Validates if a password meets the ""Internal Firewall"" rules.",public,String password,boolean,"Security: Ensures the password is not null, not empty, and meets length requirements."
+,Employee,resetPassword,Abstract Override: Defines the mechanism for updating user credentials.,public,String newPassword,void,Constraint: New password must pass isPasswordValid before being committed.
+,Employee,getPasswordStrength,Abstract Override: Scores the complexity of the provided credential.,public,String password,int,Encapsulation: Returns 0 (weak) to 5 (strong) based on character variety.
+,Employee,getRole,Abstract Override: Mandates role identification for UI rendering.,public,none,Position,"Polymorphism: Returns the specific Enum (ADMIN, HR, etc.) to the DashboardPanel."
+,Employee,viewSalary,Formats gross and net pay for UI display.,public,none,String,"Shared: Returns name, ID, and position"
+,Employee,viewPersonalInformation,Returns a profile summary for the UI.,public,none,String,"Shared: Returns name, ID, and position in a fixed array."
+,Employee,authenticate (1),"Checks a username and password pair against users.csv. If they match, the controller opens the dashboard for that employee’s role.",public,"String user, String pass",boolean,Overloading (1): declared in UserHub. Blank values are rejected. A wrong username and a wrong password give the same failure result.
+,Employee,authenticate (2),Checks an existing session token so a signed-in user can continue without typing credentials again.,public,String token,boolean,"Overloading (2): same name as (1) with a different parameter list (one String instead of two). Null, blank or expired tokens return false."
+,Employee,applyLeave,Initiates the leave request process.,public,"String leaveID, int empNo, LocalDate startDate, LocalDate endDate",LeaveRequest,Partial Abstraction: Defined in Parent so all roles can file leaves.
+,Employee,calculateTotalHoursWorked,Aggregates attendance logs.,public,none,double,Abstract: Every child must define how they pull logs.
+,Employee,getHourlyRate,Derives the hourly rate from the monthly basic salary for payroll computation.,public,none,double,Formula: basicSalary / 168 (21 working days × 8 hours). Derived on request and never stored.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Admin,updateLeaveStatus(),The authority to Approve or Reject a request.,public,"String leaveID, String newStatus",void,Polymorphic Authorization: Only classes implementing LeaveHub can execute this.
+,Admin,addEmployee,Adds a new employee object to the persistent storage (CSV).,public,Employee emp,void,Interface Realization: Implements AdminHub to commit a new record to the CSV.
+,Admin,generateNextEmpNo,Calculates the next available unique ID for a new hire.,public,None,int,Logic: Finds the highest existing ID in CSV and adds 1.
+,Admin,isEmployeeValid,Validates if an employee object has all required fields before saving.,public,Employee emp,boolean,Checks for null objects and missing Employee Numbers.
+,Admin,updateEmployee,Modifies existing data for a specific employee in the database.,public,int empNo,void,Uses empNo as a key to find the correct row in the CSV.
+,Admin,removeEmployee,Deletes an employee's record from the system.,public,int empNo,void,"Permanent deletion logic; should handle ""ID not found"" errors."
+,Admin,authenticate,Grants access to the Admin-level Dashboard.,public,"String user, String pass",boolean,@Override: Inherited from Employee. Implementation focuses on Admin-level credentials.
+,Admin,getRole,Identifies the user as an Administrator for UI rendering.,public,None,Position,Returns Role.ADMIN to unlock full system access.
+,Admin,CalculatePay,Orchestrates the payroll process for the Admin user.,public,None,double,Overrides parent abstract method to handle Admin-specific pay logic.
+,Admin,calculateTotalHoursWorked,Sums up time-in/time-out logs for the Admin.,public,None,double,Currently returns 0.0 (Placeholder for attendance logic).
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,HumanResources,updateEmployeeDetails,"Updates personnel records (e.g., address, position) in the CSV database.",public,int empNo,void,Permission: Requires EMPLOYEE_UPDATE. empID must exist in CSV.
+,HumanResources,viewEmployeeProfile,Retrieves full employee details for HR review.,public,int empID,Employee,Permission: Requires EMPLOYEE_READ. Returns the employee object if found.
+,HumanResources,approveLeaveRequest,Switches a leave request status from PENDING to APPROVED.,public,String leaveID,void,Workflow: Validates that the leave request exists and is currently PENDING.
+,HumanResources,rejectLeaveRequest,Rejects a leave request and records the reason for the denial.,public,"String leaveID, String reason",void,Logic: Updates the Leave CSV with the rejection status and note.
+,HumanResources,viewAllLeaveRequests,Pulls a master list of all pending and processed leaves for the company.,public,none,List<LeaveRequest>,Abstraction: Delegated to LeaveService to fetch data from file.
+,HumanResources,getRole,Returns the specific role for dashboard rendering.,public,none,Position,Returns Role.HR_STAFF (High-level personnel access).
+,HumanResources,authenticate,Validates HR credentials to grant system access.,public,"String user, String pass",boolean,@Override: Inherited from Employee. Implements HR-specific security checks.
+,HumanResources,calculateGrossSalary,Calculates total pay including HR-specific allowances.,public,none,double,Formula: (Hourly Rate * 160) + Allowances.
+,HumanResources,CalculatePay,Overrides the parent method and returns HR gross pay.,public,none,double,@Override: returns gross pay for HumanResources.
+,HumanResources,updateLeaveStatus,The authority to Approve or Reject a request.,public,"String leaveID, String newStatus",void,Polymorphic Authorization: Only classes implementing LeaveHub can execute this.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Accounting,batchProcessPayroll,Triggers the high-level payroll logic for the current cycle.,public,String payPeriod,void,Role-Based: Only accessible to ACCOUNTING role.
+,Accounting,createPayslip (1),Produces a detailed breakdown of earnings/deductions.,public,int empNo,Payslip,@Override: Implements interface. empNo must exist in the system.
+,Accounting,createPayslip (2),Produces a breakdown for a specific period.,public,"int empNo, String period",Payslip,@Override: Implements interface. Ensures data integrity for historical records.
+,Accounting,generateTaxReport,Creates a summary of withholding taxes for BIR compliance.,public,String quarter,File,Compliance: Aggregates all employee tax data for the period.
+,Accounting,generateDeductionSummary,"Reports total SSS, PhilHealth, and Pag-IBIG contributions.",public,String month,SummaryData,Audit: Used to reconcile payments to government agencies.
+,Accounting,viewSalaryData,Accesses the money variables inherited from the parent.,protected,none ,double,Inheritance: Uses protected access to read basicSalary directly.
+,Accounting,computeStatutoryDeductions,"Aggregates SSS, PhilHealth, and Pag-IBIG for calculations.",private,double gross,double,Security: Math is kept internal to the Finance role.
+,Accounting,calculateGrossSalary,Computes total pay including all allowances.,public,none ,double,Formula: (hourlyRate * hours) + rice + phone + clothing.
+,Accounting,CalculatePay,Computes total pay including all allowances,public,none ,double,@Override: returns gross pay for Accounting.
+,Accounting,updateSalaryRates,Updates an employee’s basic salary. Allowances are updated through their own setters.,public,"int empNo, double newBasicSalary",void,"Firewall: only Accounting implements FinanceHub, so no other role can change pay. empNo must exist; newBasicSalary must be greater than 0. Loads the record, calls setBasicSalary, saves through CsvHandler. hourlyRate follows automatically."
+,Accounting,getRole,Mandates role identification for UI rendering.,public,none ,Position,Returns Role.ACCOUNTING to unlock Finance tools.
+,Accounting,authenticate,Validates credentials for accounting access.,public,"String user, String pass",boolean,@Override: Implements UserHub contract. Returns true on success.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,InfoTech,CalculatePay,Overrides the parent salary computation by adding a Technical Differential (on-call hours) and night-shift premium to the standard salary calculation.,public,none,double,Overriding: Implemented to extend base salary computation for InfoTech.
+,InfoTech,checkSystemHealth,"Checks whether the payroll data store is available (employee.csv, attendance.csv, leaves.csv, users.csv exist and can be read).",public,none,boolean,Returns true only if every file is present and readable. Never reads or shows employee or salary data.
+,InfoTech,resetCredentials (1),Standard reset: IT assigns a new password to an employee account once the new password passes isPasswordValid.,public,"int empNo, String newPass",boolean,Overloading (1): two parameters. Returns true only if the empID exists in users.csv and the record was updated. The stored password is never displayed.
+,InfoTech,resetCredentials (2),Override reset for higher-trust cases (for example a locked account). IT also supplies an administrative token before the password is changed.,public,"int empNo, String newPass, String adminToken",boolean,"Overloading (2): three parameters, so the compiler can tell it apart from (1). An invalid token returns false and changes nothing. The override can be recorded by resolving an ITTicket."
+,InfoTech,getRole(),Identifies the user as an IT specialist for UI rendering.,public,none,Position,Polymorphism: Returns Role.IT to unlock specialized system health dashboards.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Regular,viewOwnProfile,Allows the worker to see their own personal and contact details.,public,none,void,"Inheritance: Uses parent fields (Name, Address, empNo.) directly."
+,Regular,calculatePay,"Returns gross pay: base only if Probationary, base plus allowances if Regular.",public,none,double,"@Override Runtime Polymorphism Intercepts the parent command. Status-Based Logic: Uses the inherited protected status attribute to choose between Probationary (getHourlyRate() × hoursWorked, with no allowances.) and Regular (getHourlyRate() × hoursWorked plus rice, phone and clothing allowances."
+,Regular,getRole,Returns the role to the Dashboard for UI rendering.,public,none,Position,"Returns Role.REGULAR_STAFF. Triggers the ""Basic"" view."
+,Regular,authenticate,Validates the staff member's credentials.,public,"String user, String pass",boolean,Inheritance: Uses the parent's credential logic.
+,Regular,logout,Safely exits the session.,public,none,void,Standard exit procedure.
+,Regular,calculateGrossSalary,Computes basic pay based on hours worked.,public,none,double,Probationary Logic: Uses the protected status to switch between a base pay formula and a full benefits formula at runtime without needing redundant classes. Formula: (hourlyRate \times hoursWorked) + FixedAllowances.
+,Regular,isPasswordValid,Ensures the user has a secure password.,public,none,boolean,Standard security check ( length > 8).
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,PayrollCalculator,finalGross,Returns the gross pay by delegating to the employee’s own CalculatePay(),public,Employee emp,double,Reads no fields directly. Polymorphism picks the right role formula.
+,PayrollCalculator,finalSSS,Determines the SSS deduction using the 2024/2025 statutory table.,public,double gross,double,"Logic Hiding: Contains the actual bracket logic (the 29,750 cap)."
+,PayrollCalculator,finalPhilHealth,Calculates the PhilHealth premium (currently 5% of basic salary).,public,double basic,double,Compliance: Implements the 50/50 employer-employee split logic.
+,PayrollCalculator,finalPagIBIG,Calculates the Pag-IBIG contribution.,public,double gross,double,Rule: Usually a fixed 100.00 or 2% capped at a certain amount.
+,PayrollCalculator,taxedNet,Computes withholding tax based on BIR/TRAIN law brackets.,public,double taxable,double,"Policy: Returns 0.0 if monthly taxable income ≤ 20,833."
+,PayrollCalculator,payAfterDeductions,The Firewall logic: Subtracts all deductions from the gross salary.,public,"double gross, double deduct",double,"Safety: Ensures result is never <0 using Math.max(0, net)."
+,PayrollCalculator,sumDeductions,Full Summary: Aggregates all government deductions.,public,Employee emp,double,Overloading (1): Returns the total SSS + PhilHealth + PagIBIG + Tax.
+,PayrollCalculator,sumDeductions,Specific Summary: Targets one specific deduction type.,public,"Employee emp, String type",double,"Overloading (2): Returns only the requested type (""SSS"")."
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Main (start),start,The main entry point that boots the system and opens the Login screen.,public,none,void,Guard: Check if the CSV database is linked before proceeding.
+,Main (start),initialize,"Creates instances of CSVHandler, PayrollCalculator, and Attendance.",private,none,void,Robustness: Must handle FileNotFoundException if CSVs are missing.
+,Main (start),login (1),Standard Login: Bridge between the UI and CSVHandler for credentials.,private,"String user, String pass",Employee,Overloading (1): Validates manual input against the system firewall.
+,Main (start),login (2),Token Login: Fast-tracks authentication for active sessions.,private,String token,Employee,Overloading (2): Demonstrates model flexibility for automated access.
+,Main (start),appropriateDashboard,The heart of Polymorphism. Sends users to their specific UI.,private,Employee user,void,Logic: Uses user.getRole() to determine the next screen. Polymorphic Switch: Uses instanceof to determine the object's specific type at runtime.
+,Main (start),logout,Resets the currentUser session and returns to the Login screen.,private,none,void,Session Management: Wipes RAM data.
+,Main (start),exit,Closes all file connections and shuts down the program.,public,none,void,"Integrity: Ensure no ""Write"" operations are pending in the CSV."
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,PayrollProcessor,calculateTotalHoursWorked,Aggregates raw attendance logs for a specific pay period.,public,none,double,Logic: Must pull from Attendance; result must be ≥0.
+,PayrollProcessor,calculateGrossSalary,Computes total pay before any statutory deductions.,public,none,double,Formula: (HourlyRate×Hours)+Allowances.
+,PayrollProcessor,getNetPay,"Computes the final ""Take Home"" pay.",public,none,double,Firewall: Logic must ensure Net Pay is never negative.
+,PayrollProcessor,CalculatePay,The high-level trigger that runs the full pay logic. ,public,none,double,getHourlyRate() × hoursWorked + allowances
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Payslip,Payslip,Creates one printable payslip for an employee and cut-off period.,public,"PayrollBreakdown breakdown, String employeeName, String position, String cutOff",Constructor,All four values required. Fields are private final. cutOff must not be blank.
+,Payslip,getBreakdown,Returns the figures shown on the payslip.,public,none,PayrollBreakdown,None (read-only)
+,Payslip,getEmployeeName,Returns the employee’s name printed on the payslip.,public,none,String,None (read-only)
+,Payslip,getPosition,Returns the employee’s position printed on the payslip.,public,none,String,None (read-only)
+,Payslip,getCutOff,Returns the cut-off period the payslip covers.,public,none,String,None (read-only)
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,SummaryData,SummaryData,Creates the monthly deduction totals.,public,"int month, int year, double totalSss, double totalPhilHealth, double totalPagIbig, double totalTax",Constructor,month 1 to 12. year must be four digits. No negative amounts. Fields are private final.
+,SummaryData,getTotalSss,Returns total SSS contributions for the month.,public,none,double,None (read-only)
+,SummaryData,getTotalPhilHealth,Returns total PhilHealth contributions for the month.,public,none,double,None (read-only)
+,SummaryData,getTotalPagIbig,Returns total Pag-IBIG contributions for the month.,public,none,double,None (read-only)
+,SummaryData,getTotalTax,Returns total withholding tax for the month.,public,none,double,None (read-only)
+,SummaryData,getTotalDeductions,Returns the sum of all four totals.,public,none,double,"Derived on request, never stored, so it cannot disagree with its inputs."
+,SummaryData,getMonth / getYear,Returns the period the summary belongs to.,public,none,int,None (read-only)
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,PayrollBreakdown,PayrollBreakdown,Creates a locked snapshot of one completed payroll computation.,public,"int empNo, int month, int year, double gross, double sss, double philHealth, double pagIbig, double withholdingTax, double totalDeductions, double netPay",Constructor,"-all 10+ values are required, no partial records
+-no amount may be negative
+-netPay must equal gross minus totalDeductions
+-all fields private final"
+,PayrollBreakdown,getEmpNo,Returns the employee the snapshot belongs to.,public,none,int,None (read-only)
+,PayrollBreakdown,getGrossPay,Returns gross pay for the period.,public,none,double,None (read-only)
+,PayrollBreakdown,getSssDeduction,Returns the SSS contribution.,public,none,double,None (read-only)
+,PayrollBreakdown,getPhilHealthDeduction,Returns the PhilHealth contribution.,public,none,double,None (read-only)
+,PayrollBreakdown,getPagIbigDeduction,Returns the Pag-IBIG contribution.,public,none,double,None (read-only)
+,PayrollBreakdown,getWithholdingTax,Returns the withholding tax.,public,none,double,None (read-only)
+,PayrollBreakdown,getTotalDeductions,Returns the sum of all deductions.,public,none,double,None (read-only)
+,PayrollBreakdown,getNetPay,Returns the take-home pay printed on the payslip.,public,none,double,"None (read-only). No setters exist, so the audit record cannot be altered."
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,"UserHub
+",getRole,Identifies the user’s level for UI rendering.,public,none,Position,Polymorphism: Tells the DashboardPanel which buttons to show.
+,"UserHub
+",authenticate (1),Credential Logic: Validates a user via username and password.,public,"String user, String pass",boolean,Method Overloading: Standard entry point for manual user login via CSV lookup.
+,"UserHub
+",authenticate (2),Token Logic: Validates a user session via an encrypted security token.,public,String token,boolean,Method Overloading: Allows the system to bypass manual entry for persistent active sessions.
+,"UserHub
+",isPasswordValid,Enforces the security for password complexity.,public,String pass,boolean,Security: Mandates rules (minimum 8 characters).
+,"UserHub
+",getPasswordStrength,Evaluates the security level of a password.,public,String pass,int (0-5),"Audit: Scores the password based on symbols, cases, and numbers."
+,"UserHub
+",resetPassword,"Updates the record while enforcing a ""No-Repeat"" policy.",public,String newPass,void,Safety: New password cannot match the current existing record.
+,"UserHub
+",logout,Terminates the session and clears transient data.,public,none,void,"Integrity: Prevents ""Information Leakage"" as noted in your Week 5 CRC."
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,AdminHub,addEmployee,Adds a new validated employee record to the database.,public,Employee emp,void,Abstraction: Uses a full Object rather than raw strings to ensure data integrity.
+,AdminHub,generateNextEmpNo,Automates the assignment of a new unique Employee ID.,public,none,int,Automation: Replaces manual entry to prevent duplicate empNo errors.
+,AdminHub,isEmployeeValid,Performs a logic-layer check before saving data.,public,Employee emp,boolean,Firewall: Checks for null fields or invalid salary amounts before CSV write.
+,AdminHub,updateEmployee,Modifies an existing record in the persistent storage.,public,"int id, Employee data",void,Integrity: Ensures the id exists before attempting an update.
+,AdminHub,removeEmployee,Deletes a record from the system securely.,public,int id,void,Safety Check: Blocks deletion if the target id matches the active session.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,HRHub,updateEmployeeDetails,"Updates personal info like address, contact, or marital status.",public,"int empNo, Employee data",void,Integrity: Restricted to existing records; cannot be used to create new IDs.
+,HRHub,viewEmployeeProfile,Retrieves the full master record for verification.,public,int empNo,Employee,Read Access: HR requires full visibility to audit personnel data.
+,HRHub,approveLeaveRequest,"Sets a pending leave status to ""Approved.""",public,String leaveID,void,Workflow: Acts as the bridge between attendance and payroll deduction.
+,HRHub,rejectLeaveRequest,Denies a leave request with a recorded reason.,public,"String leaveID, String reason",void,Validation: reason must not be empty for clear staff communication.
+,HRHub,viewAllLeaveRequests,Lists all filed requests for review/scheduling.,public,none,List<LeaveRequest>,Management: Essential for tracking department-wide availability.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,FinanceHub,batchProcessPayroll,Triggers calculations for all employees in a specific period.,public,String payPeriod,void,Data Integrity: Mass calculation logic must only be accessible to authorized finance staff.
+,FinanceHub,generatePayslip (1),Single Payslip: Generates for a specific employee.,public,int empNo,Payslip,Overloading (1): Used for individual employee requests.
+,FinanceHub,generatePayslip (2),Period Payslip: Generates for an employee and specific date.,public,"int empNo, String period",Payslip,Overloading (2): Used for historical audits or specific pay cycles.
+,FinanceHub,generateTaxReport,Summarizes withholding taxes for government compliance.,public,String quarter,File / Report,Abstraction: Uses the PayrollCalculator to aggregate individual tax totals.
+,FinanceHub,generateDeductionSummary,"Reports total SSS, PhilHealth, and Pag-IBIG contributions.",public,String month,SummaryData,Statutory Compliance: Ensures all mandatory government shares are accounted for.
+,FinanceHub,updateSalaryRates,Updates an employee’s basic salary. Allowances are updated through their own setters.,public,"int empNo, double newBasicSalary",void,"Firewall: only Accounting implements FinanceHub, so no other role can change pay. empNo must exist; newBasicSalary must be greater than 0. Loads the record, calls setBasicSalary, saves through CsvHandler. hourlyRate follows automatically."
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,SystemSupportHub,resetCredentials (1),Performs a standard credential reset by assigning a new password to the specified employee account.,public,"int empID, String newPassword",boolean,Overloading (1): two parameters. Returns true only if the empID exists in users.csv and the record was updated. The stored password is never displayed.
+,SystemSupportHub,resetCredentials (2),Performs a secure credential override using an administrative token for higher-trust recovery scenarios.,public,"int empID, String newPassword, String adminToken",boolean,"Overloading (2): three parameters, so the compiler can tell it apart from (1). An invalid token returns false and changes nothing. The override can be recorded by resolving an ITTicket."
+,SystemSupportHub,checkSystemHealth,Check whether the payroll data store/system is operational (“healthy”).,public,none,boolean,Abstraction: Verifies operational status of the payroll data source without exposing employee records or financial information.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,LeaveHub,applyLeave,Submits a new leave request for processing within the payroll system.,public,"String leaveID, int empNo, LocalDate startDate, LocalDate endDate",LeaveRequest,Abstraction and Workflow Separation: Defines the standardized method for filing a leave request without embedding approval authority; ensures consistent leave submission structure across all implementing roles.
+,LeaveHub,updateLeaveStatus,Updates the status of an existing leave request (APPROVED or REJECTED).,public,"String leaveID, String newStatus",void,"Enforces that status changes occur only through authorized workflow operations, maintaining separation between leave filing and approval authority"
+,LeaveHub,viewAllLeaveRequests,To retrieve the master list of all requests for review.,public,none,List<LeaveRequest>,Required for Admin/HR roles to audit the company's availability.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,LeaveRequest,LeaveRequest (constructor),Creates a new leave request with default status set to PENDING.,public,"String leaveID, int empNo, LocalDate startDate, LocalDate endDate",none,Encapsulation: Ensures the object initializes with a valid state by automatically setting status to PENDING and validating date integrity within the constructor.
+,LeaveRequest,approve,Changes the leave request status to APPROVED.,public,none,void,"Confidentiality: Internal status logic is hidden, and transitions occur only through authorized behavior methods."
+,LeaveRequest,reject,Changes the leave request status to REJECTED.,public,none,void,"Confidentiality: Internal status logic is hidden, and transitions occur only through authorized behavior methods."
+,LeaveRequest,getStatus,Retrieves the current status of the leave request.,public,none,String,"Returns the current Enum state (PENDING, APPROVED, REJECTED)."
+,LeaveRequest,validateDates,Ensures that the end date is not earlier than the start date.,private,none,void,Data Integrity through Encapsulation: Enforces chronological validation rules internally so that invalid date ranges cannot exist within the LeaveRequest object.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Attendance,Attendance,Creates one daily time record for an employee.,public,"int empNo, LocalDate date, LocalTime timeIn, LocalTime timeOut",Constructor,"-empNo, date, timeIn and timeOut must not be null
+-timeOut must not be before timeIn
+-date is stored as a private final field"
+,Attendance,getDate,Returns the date of the record.,public,none,LocalDate,None (read-only)
+,Attendance,getTimeIn,Returns the logged time in.,public,none,LocalTime,None (read-only)
+,Attendance,getTimeOut,Returns the logged time out.,public,none,LocalTime,None (read-only)
+,Attendance,setTimeOut,"Updates the time out, for example when a missing log is corrected.",public,LocalTime timeOut,void,"-timeOut must not be null
+-timeOut must not be before timeIn"
+,Attendance,getLateMinutes,Reports how many minutes the employee arrived after the allowed start.,public,none,int,"Computed by private logic, never supplied from outside. Assumption: start 08:00 with a 10-minute grace period (confirm against MotorPH policy). Returns 0 if on time."
+,Attendance,getHoursWorked,"Reports hours worked for the day, used by payroll for gross pay.",public,none,double,Time between timeIn and timeOut less a one-hour unpaid break (assumption). Never negative.
+,Attendance,getOvertimeHours,Reports hours beyond the standard shift.,public,none,double,"Returns 0 when no overtime. Overtime needs supervisor approval in the process flow, so the approval check belongs to the caller."
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,PeriodSummary,PeriodSummary,Creates an empty summary for one employee and one month.,public,"int empNo, int month, int year",Constructor,"-month must be 1 to 12
+-year must be a valid four-digit year
+-empNo must not be blank
+-month and year cannot be changed afterwards"
+,PeriodSummary,addGross,Adds a pay amount to the running gross income.,public,double amount,void,-amount must not be negative
+,PeriodSummary,addDeduction,Adds a deduction to the running total.,public,double amount,void,-amount must not be negative
+,PeriodSummary,addLateMinutes,Adds late minutes from an Attendance record.,public,int minutes,void,-minutes must not be negative
+,PeriodSummary,getGrossIncome,Returns total gross income for the period.,public,none,double,None (read-only)
+,PeriodSummary,getTotalDeductions,Returns total deductions for the period.,public,none,double,None (read-only)
+,PeriodSummary,getNetIncome,Returns gross income minus deductions.,public,none,double,"Derived on request, never stored, so it cannot disagree with its inputs."
+,PeriodSummary,getTotalLateMinutes,Returns accumulated late minutes.,public,none,int,None (read-only)
+,PeriodSummary,getMonth / getYear,Return the period the summary belongs to.,public,none,int,None (read-only)
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,ITTicket,ITTicket,Creates a new support ticket in OPEN status.,public,"int empNo, String username, String issueType, String description",Constructor,"-all four values must not be blank
+-ticketId and creation timestamp are generated here
+-status always starts as OPEN"
+,ITTicket,getTicketId,Returns the generated ticket identifier.,public,none,String,"None (read-only, no setter)"
+,ITTicket,getEmployeeNo,Returns the requester's employee number.,public,none,int,"None (read-only, no setter)"
+,ITTicket,getIssueType,Returns the issue category.,public,none,String,None (read-only)
+,ITTicket,getDescription,Returns the problem description.,public,none,String,None (read-only)
+,ITTicket,getStatus,Returns OPEN or RESOLVED.,public,none,String,None (read-only)
+,ITTicket,resolve,Closes the ticket and records who closed it and when.,public,String resolverName,void,"-resolverName must not be blank
+-allowed only while status is OPEN
+-timestamp captured with LocalDateTime.now()"
+,ITTicket,toCSV,Exports the ticket as one CSV line for storage.,public,none,String,Values containing commas must be quoted.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Position,getLabel,Returns the display name of the role.,public,none,String,None
+,Position,isApprover,Tells whether the role may approve leave requests.,public,none,boolean,True for ADMIN and HR only.
+,Position,fromString (1),Converts a role name or label into a Role constant.,public static,String text,Position,"-text must not be null
+-trimmed and case-insensitive
+-throws IllegalArgumentException if no role matches"
+,Position,fromString (2),Overload that accepts a fallback for unknown text.,public static,"String text, Position",Position,Returns fallback instead of throwing. Used by the CSV loader so one bad row does not stop loading.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,CsvHandler,appendToCSV,Adds a new record line at the end of a file.,public static, ,void,"-filePath must exist
+-data must not be empty
+-values containing commas are quoted"
+,CsvHandler,updateCSV,Replaces the record whose first column matches the employee number.,public static,"String filePath, int empNo, String... data",void,"-empNo must match exactly one row
+-all other rows are written back unchanged"
+,CsvHandler,deleteFromCSV,Removes the record whose first column matches the employee number.,public static,"String filePath, int empNo",void,"-empNo must match exactly one row
+-caller must be authorised (checked in AdminHub, not here)"
+,CsvHandler,loadAvailableMonths,Collects the distinct months found in an attendance file.,public static,String filePath,Set<String>,Returns an empty set if the file has no data rows.
+,CsvHandler,loadEmployeeData,Reads employee records into a table model.,public static,"String filePath, DefaultTableModel model",void,"-model must not be null
+-malformed rows are skipped, not fatal"
+,CsvHandler,getLastEmployeeNumber,Finds the highest employee number in use.,public static,String filePath,int,Returns 0 for an empty file; the next number is this value plus one.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,EmployeeData,EmployeeData,Creates the container for one employee row.,public,"int empNo, String lastName, String firstName, ... (19 fields)",Constructor,No business logic. Field values are validated by Employee when a domain object is built.
+,EmployeeData,getEmpNo,Returns the employee number.,public,none,int,"None. Remaining attribute getters (names, birthday, address, phone, government numbers, status, position, supervisor) follow the same pattern."
+,EmployeeData,getBasicSalary,Returns basic salary as read from the file.,public,none,double,None. Allowance and rate getters follow the same pattern.
+,EmployeeData,toCsvRow,Converts the object into an ordered array for writing.,public,none,String[],Order must match the Employee Details columns.
+,EmployeeData,fromCsvRow,Builds an object from one CSV row.,public static,String[] row,EmployeeData,"-row must contain 19 values
+-numeric fields are parsed, with the row rejected if parsing fails"
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,GUILogin,GUILogin,Builds the login screen.,public,none,Constructor,Styling comes from GUIUtility.
+,GUILogin,handleLogin,Reads the fields and requests authentication.,private,none,void,"-username and password must not be blank
+-shows one generic message on failure"
+,GUILogin,isPasswordValid,Checks a password against the validity rules before submission.,public,String pass,boolean,Delegates to the UserHub implementation.
+,GUILogin,getPasswordStrength,Shows how strong the typed password is.,public,String pass,int (0-5),Delegates to the UserHub implementation.
+,GUILogin,openDashboardForRole,Opens the dashboard that fits the logged-in user.,private,Employee user,void,Uses getRole() and instanceof; nothing opens if the role is unknown.
+,GUILogin,clearFields,Empties the input fields.,private,none,void,Called after a failed or finished login.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,GUIForgotPass,GUIForgotPass,Builds the password recovery screen.,public,none,Constructor,None
+,GUIForgotPass,handleReset,Sends the reset request when the user confirms.,private,none,void,Runs validateResetInput first; message is the same whether or not the employee exists.
+,GUIForgotPass,validateResetInput,Checks the entered values before any change.,private,"int empNo, String newPass, String confirmPass",boolean,"-no field may be blank
+-newPass must equal confirmPass
+-newPass must pass isPasswordValid"
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,GUITimesheet,GUITimesheet,Builds the attendance screen.,public,none,Constructor,None
+,GUITimesheet,setLoggedIn,Tells the panel which employee is using it.,public,Employee emp,void,-emp must not be null
+,GUITimesheet,checkIn,Records time in for today.,private,none,void,Rejected if today already has a time in for this employee.
+,GUITimesheet,checkOut,Records time out for today.,private,none,void,Rejected if there is no time in yet today.
+,GUITimesheet,loadAvailableMonths,Fills the month selector from the data.,private,none,void,Uses CsvHandler.loadAvailableMonths.
+,GUITimesheet,reloadTable,Refreshes the table for the chosen month.,private,none,void,Shows late minutes and hours worked from Attendance.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,GUILeave,GUILeave,Builds the leave screen.,public,Employee user,Constructor,-user must not be null
+,GUILeave,submitLeaveRequest,Files a leave request for the logged-in employee.,private,none,void,"Calls validateDates, then LeaveHub.applyLeave. Status starts as PENDING."
+,GUILeave,validateDates,Checks the chosen dates.,private,"LocalDate start, LocalDate end",boolean,"-neither date may be null
+-end must not be before start"
+,GUILeave,reloadLeaveTable,Refreshes the list of requests.,private,none,void,Approvers see all requests; other users see their own.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,GUIDashboard,GUIDashboard,Builds the employee management screen.,public,Employee user,Constructor,"-user must not be null
+-buttons enabled by the user's interfaces"
+,GUIDashboard,getSelectedEmployeeNo,Returns the employee number of the selected table row.,public,none,int,Returns null if no row is selected.
+,GUIDashboard,getFormData,Reads the form into an EmployeeData object.,public,none,EmployeeData,-required fields must be filled
+,GUIDashboard,searchEmployee,Finds an employee by number and shows the record.,private,none,void,Shows a message if no match.
+,GUIDashboard,calculateSalary,Computes pay for the selected employee.,private,none,void,Calls PayrollCalculator and displays a PayrollBreakdown.
+,GUIDashboard,updateEmployee,Saves edits to the selected record.,private,none,void,Only when the user implements AdminHub or HRHub.
+,GUIDashboard,deleteSelectedRow,Deletes the selected record.,private,none,void,Admin only; asks for confirmation first.
+,GUIDashboard,reloadTable,Reloads the table from the file.,private,none,void,None
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,GUIUtility,createButton,Builds a styled button.,public static,"String text, Color background",JButton,-text must not be null
+,GUIUtility,createNavButton,Builds a navigation button.,public static,String text,JButton,None
+,GUIUtility,createTextField,Builds a styled input field.,public static,int columns,JTextField,-columns must be positive
+,GUIUtility,createHeaderLabel,Builds a section header label.,public static,String text,JLabel,None
+,GUIUtility,createTitledPanel,Builds a panel with a titled border.,public static,String title,JPanel,None
+,GUIUtility,createEmployeeInfoPanel,Builds the employee information section.,public static,none,JPanel,Combines the personal and financial panels.
+,GUIUtility,createPersonalInfoPanel,Builds the personal details section.,public static,none,JPanel,None
+,GUIUtility,createFinancialInfoPanel,Builds the salary and allowance section.,public static,none,JPanel,None

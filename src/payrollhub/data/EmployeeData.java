@@ -199,7 +199,7 @@ public class EmployeeData {
     }
 
     public void setAddress(String address) {
-        this.address = requireDigits(address, "Address");
+        this.address = requireText(address, "Address");
     }
 
     public void setPhone(String phone) {
