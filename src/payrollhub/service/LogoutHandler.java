@@ -13,18 +13,15 @@ import payrollhub.gui.GUILogin;
  * @author Jae
  */
 public class LogoutHandler {
-    
-    public void logout(JFrame currentForm){
-        
-        //open the Login GUI
-        
+
+    public void logout(JFrame currentForm) {
+
+        // open the Login GUI
         GUILogin loginForm = new GUILogin();
         loginForm.setVisible(true);
-        
+
         currentForm.dispose();
-        
-        
-        
+
     }
-    
+
 }

@@ -42,9 +42,17 @@ The design package (CRC cards and Method Dictionary) is organized by OOP pillar.
 
 ```
 PayrollHub/
+├── pom.xml
+├── nbactions.xml
 ├── src/
+│   ├── data/
+│   │   ├── employee.csv
+│   │   ├── attendance.csv
+│   │   ├── leaves.csv
+│   │   └── users.csv
+│   ├── docs/
 │   └── payrollhub/
-│       ├── Main.java        # Controller: start, login, dashboard routing, logout, exit
+│       ├── Main.java        # Application entry point; launches the Swing login screen
 │       ├── model/                    # Employee hierarchy and domain objects
 │       │   ├── Employee.java
 │       │   ├── Admin.java
@@ -56,7 +64,8 @@ PayrollHub/
 │       │   ├── LeaveRequest.java
 │       │   ├── Attendance.java
 │       │   ├── PayrollBreakdown.java
-│       │   ├── PeriodSummary.java
+│       │   ├── Payslip.java
+│       │   ├── SummaryData.java
 │       │   └── ITTicket.java
 │       ├── contracts/                # Interfaces
 │       │   ├── UserHub.java
@@ -67,7 +76,11 @@ PayrollHub/
 │       │   ├── LeaveHub.java
 │       │   └── PayrollProcessor.java
 │       ├── service/
-│       │   └── PayrollCalculator.java
+│       │   ├── PayrollCalculator.java
+│       │   ├── AttendanceService.java
+│       │   ├── LeaveService.java
+│       │   ├── UserService.java
+│       │   └── LogoutHandler.java
 │       ├── data/                     # File layer
 │       │   ├── CsvHandler.java
 │       │   └── EmployeeData.java
@@ -77,53 +90,43 @@ PayrollHub/
 │           ├── GUIDashboard.java
 │           ├── GUITimesheet.java
 │           ├── GUILeave.java
-│           ├── GUIPayslip.java
-│           ├── GUIAddEmployee.java
-│           └── GUIUtility.java
-├── data/                             # CSV "database"
-│   ├── employees.csv
-│   ├── attendance.csv
-│   ├── leaves.csv
-│   └── users.csv
-├── docs/                             # Design package and process flowchart
+│           ├── GUIUtility.java
+│           └── GUIUser.java
 └── README.md
 ```
 
 ## Data files
 
-Employee and attendance data come from the MotorPH dataset. All reading and writing goes through `CsvHandler`, so no screen parses CSV on its own. `EmployeeData` carries one employee row (19 fields) between the file layer and the GUI.
+Employee and attendance data come from the MotorPH dataset. All reading and writing goes through `CsvHandler`, so no screen parses CSV on its own. `EmployeeData` carries one employee row (17 fields) between the file layer and the GUI. CSV files are stored in `src/data/`.
 
 ## Getting started
 
 ### Prerequisites
 
 - JDK 17 or later
-- VS Code with the **Extension Pack for Java** (or any Java IDE)
+- Apache NetBeans 22 or later
+- Maven available to NetBeans (its bundled Maven installation is fine)
+
+### Run in Apache NetBeans
+
+1. Open the project directory containing `pom.xml` as a Maven project.
+2. Configure the project to use JDK 17 or later and ensure NetBeans has a Maven installation selected.
+3. Select **Run Project**. The project action in `nbactions.xml` runs `payrollhub.Main`.
+
+The CSV files are read from `src/data/` relative to the project directory. Run the project from NetBeans using the project root as the working directory.
 
 ### Run in VS Code
 
-1. Clone the repository:
-   ```bash
-   git clone <your-repo-url>
-   cd PayrollHub
-   ```
-2. Open the folder in VS Code.
-3. Open `src/payrollhub/PayrollSystem.java` and click **Run** above the `main` method.
+1. Open the project root in VS Code with the **Extension Pack for Java** installed.
+2. Ensure Maven and JDK 17 or later are available.
+3. Run `mvn compile exec:java` from the project root.
 
-Run the app from the project root so the relative `data/` path resolves.
+Run the app from the project root so the relative `src/data/` path resolves.
 
 ### Run from the command line
 
-```bash
-javac -d bin $(find src -name "*.java")
-java -cp bin payrollhub.PayrollSystem
-```
-
-On Windows PowerShell:
-
 ```powershell
-javac -d bin (Get-ChildItem -Recurse src -Filter *.java).FullName
-java -cp bin payrollhub.PayrollSystem
+mvn compile exec:java
 ```
 
 ## Design decisions
