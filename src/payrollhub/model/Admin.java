@@ -12,21 +12,6 @@ public class Admin implements AdminHub, UserHub {
     }
 
     @Override
-    public void addEmployee(Employee emp) {
-        // TODO: implement employee addition
-    }
-
-    @Override
-    public int generateNextEmpNo() {
-        return 0;
-    }
-
-    @Override
-    public boolean isEmployeeValid(Employee emp) {
-        return emp != null;
-    }
-
-    @Override
     public void updateEmployee(int id, Employee data) {
         // TODO: implement employee update
     }
@@ -34,21 +19,6 @@ public class Admin implements AdminHub, UserHub {
     @Override
     public void removeEmployee(int id) {
         // TODO: implement employee removal
-    }
-
-    @Override
-    public Position getRole() {
-        return Position.ADMIN;
-    }
-
-    @Override
-    public boolean authenticate(String user, String pass) {
-        return false;
-    }
-
-    @Override
-    public boolean authenticate(String token) {
-        return false;
     }
 
     @Override
@@ -78,11 +48,6 @@ public class Admin implements AdminHub, UserHub {
             strength++;
         }
         return Math.min(strength, 5);
-    }
-
-    @Override
-    public void resetPassword(String newPass) {
-        this.password = newPass;
     }
 
     @Override

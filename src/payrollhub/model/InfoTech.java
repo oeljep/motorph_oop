@@ -1,6 +1,7 @@
 package payrollhub.model;
 
 import payrollhub.contracts.SystemSupportHub;
+import payrollhub.model.Employee;
 
 public class InfoTech implements SystemSupportHub {
 

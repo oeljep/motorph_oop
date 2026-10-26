@@ -2,6 +2,7 @@ package payrollhub.model;
 
 import java.util.List;
 import payrollhub.contracts.HRHub;
+import payrollhub.model.Employee;
 
 public class HumanResources implements HRHub {
 
