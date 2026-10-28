@@ -10,7 +10,7 @@ public abstract class Employee {
     private String firstName;
     private String address;
     private String phone;
-    private String birthday;
+    private LocalDate birthday;
 
     // Private: Work-related information
     private String position;
@@ -30,7 +30,7 @@ public abstract class Employee {
     protected double clothingAllowance;
 
     protected Employee(int empNo, String lastName, String firstName,
-            String address, String phone, String birthday,
+            String address, String phone, LocalDate birthday,
             String supervisor, String status, String position,
             String sss, String philhealth, String tin, String pagibig,
             double basicSalary, double riceSubsidy,
@@ -87,7 +87,7 @@ public abstract class Employee {
         return status;
     }
 
-    public String getBirthday() {
+    public LocalDate getBirthday() {
         return birthday;
     }
 
@@ -225,16 +225,20 @@ public abstract class Employee {
         this.pagibig = v;
     }
 
-    public void setBirthday(String v) {
-        if (v == null || v.isEmpty()) {
+    public void setBirthday(LocalDate v) {
+        if (v == null) {
             throw new IllegalArgumentException("Birthday is required.");
         }
         this.birthday = v;
     }
 
+    // If supervisor is null or empty, throw an exception. Otherwise, the employee
+    // is the CEO.
     public void setSupervisor(String v) {
         if (v == null || v.isEmpty()) {
             throw new IllegalArgumentException("Supervisor is required.");
+        } else {
+            position = "CEO";
         }
         this.supervisor = v;
     }
@@ -282,7 +286,7 @@ public abstract class Employee {
     /**
      * Abstract Override: Mandates role identification for UI rendering.
      */
-    public abstract String getRole();
+    public abstract Position getRole();
 
     /** Formats gross and net pay for UI display. */
     public String viewSalary() {
