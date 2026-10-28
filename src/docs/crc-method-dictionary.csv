@@ -68,7 +68,7 @@
 ,Employee,setPhoneAllowance,To assign or update the employee’s phone allowance while ensuring the value is valid for payroll computation.,protected,double phoneAllowance (the phone allowance amount),void,phoneAllowance must be greater than or equal to 0
 ,Employee,getClothingAllowance,To retrieve the employee’s clothing allowance for payroll calculation and benefits reporting.,public,None,double,None
 ,Employee,setClothingAllowance,To assign or update the employee’s clothing allowance while ensuring the value is non-negative.,protected,double clothingAllowance (the clothing allowance amount),void,clothingAllowance must be greater than or equal to 0
-,Employee,CalculatePay,Abstract contract for payroll.,public,none,double,Abstraction: Marked abstract in Parent; logic is hidden from the Controller.
+,Employee,calculatePay,Abstract contract for payroll.,public,none,double,Abstraction: Marked abstract in Parent; logic is hidden from the Controller.
 ,Employee,computeSSS,Shared Logic: Calculates SSS deduction based on gross income.,public,double gross,double,PayrollProcessor: Shared logic to ensure statutory compliance.
 ,Employee,computePhilHealth,Shared Logic: Calculates PhilHealth share based on basic pay.,public,double basicSalary,double,PayrollProcessor: Standardized math shared by all children.
 ,Employee,logout,Abstract Override: Safely clears the session to prevent data leakage.,public,String token,void,Abstract Override: Clears currentUser global state and resets security context.
@@ -93,7 +93,7 @@
 ,Admin,removeEmployee,Deletes an employee's record from the system.,public,int empNo,void,"Permanent deletion logic; should handle ""ID not found"" errors."
 ,Admin,authenticate,Grants access to the Admin-level Dashboard.,public,"String user, String pass",boolean,@Override: Inherited from Employee. Implementation focuses on Admin-level credentials.
 ,Admin,getRole,Identifies the user as an Administrator for UI rendering.,public,None,Position,Returns Role.ADMIN to unlock full system access.
-,Admin,CalculatePay,Orchestrates the payroll process for the Admin user.,public,None,double,Overrides parent abstract method to handle Admin-specific pay logic.
+,Admin,calculatePay,Orchestrates the payroll process for the Admin user.,public,None,double,Overrides parent abstract method to handle Admin-specific pay logic.
 ,Admin,calculateTotalHoursWorked,Sums up time-in/time-out logs for the Admin.,public,None,double,Currently returns 0.0 (Placeholder for attendance logic).
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
@@ -105,7 +105,7 @@
 ,HumanResources,getRole,Returns the specific role for dashboard rendering.,public,none,Position,Returns Role.HR_STAFF (High-level personnel access).
 ,HumanResources,authenticate,Validates HR credentials to grant system access.,public,"String user, String pass",boolean,@Override: Inherited from Employee. Implements HR-specific security checks.
 ,HumanResources,calculateGrossSalary,Calculates total pay including HR-specific allowances.,public,none,double,Formula: (Hourly Rate * 160) + Allowances.
-,HumanResources,CalculatePay,Overrides the parent method and returns HR gross pay.,public,none,double,@Override: returns gross pay for HumanResources.
+,HumanResources,calculatePay,Overrides the parent method and returns HR gross pay.,public,none,double,@Override: returns gross pay for HumanResources.
 ,HumanResources,updateLeaveStatus,The authority to Approve or Reject a request.,public,"String leaveID, String newStatus",void,Polymorphic Authorization: Only classes implementing LeaveHub can execute this.
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
@@ -117,13 +117,13 @@
 ,Accounting,viewSalaryData,Accesses the money variables inherited from the parent.,protected,none ,double,Inheritance: Uses protected access to read basicSalary directly.
 ,Accounting,computeStatutoryDeductions,"Aggregates SSS, PhilHealth, and Pag-IBIG for calculations.",private,double gross,double,Security: Math is kept internal to the Finance role.
 ,Accounting,calculateGrossSalary,Computes total pay including all allowances.,public,none ,double,Formula: (hourlyRate * hours) + rice + phone + clothing.
-,Accounting,CalculatePay,Computes total pay including all allowances,public,none ,double,@Override: returns gross pay for Accounting.
+,Accounting,calculatePay,Computes total pay including all allowances,public,none ,double,@Override: returns gross pay for Accounting.
 ,Accounting,updateSalaryRates,Updates an employee’s basic salary. Allowances are updated through their own setters.,public,"int empNo, double newBasicSalary",void,"Firewall: only Accounting implements FinanceHub, so no other role can change pay. empNo must exist; newBasicSalary must be greater than 0. Loads the record, calls setBasicSalary, saves through CsvHandler. hourlyRate follows automatically."
 ,Accounting,getRole,Mandates role identification for UI rendering.,public,none ,Position,Returns Role.ACCOUNTING to unlock Finance tools.
 ,Accounting,authenticate,Validates credentials for accounting access.,public,"String user, String pass",boolean,@Override: Implements UserHub contract. Returns true on success.
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
-,InfoTech,CalculatePay,Overrides the parent salary computation by adding a Technical Differential (on-call hours) and night-shift premium to the standard salary calculation.,public,none,double,Overriding: Implemented to extend base salary computation for InfoTech.
+,InfoTech,calculatePay,Overrides the parent salary computation by adding a Technical Differential (on-call hours) and night-shift premium to the standard salary calculation.,public,none,double,Overriding: Implemented to extend base salary computation for InfoTech.
 ,InfoTech,checkSystemHealth,"Checks whether the payroll data store is available (employee.csv, attendance.csv, leaves.csv, users.csv exist and can be read).",public,none,boolean,Returns true only if every file is present and readable. Never reads or shows employee or salary data.
 ,InfoTech,resetCredentials (1),Standard reset: IT assigns a new password to an employee account once the new password passes isPasswordValid.,public,"int empNo, String newPass",boolean,Overloading (1): two parameters. Returns true only if the empID exists in users.csv and the record was updated. The stored password is never displayed.
 ,InfoTech,resetCredentials (2),Override reset for higher-trust cases (for example a locked account). IT also supplies an administrative token before the password is changed.,public,"int empNo, String newPass, String adminToken",boolean,"Overloading (2): three parameters, so the compiler can tell it apart from (1). An invalid token returns false and changes nothing. The override can be recorded by resolving an ITTicket."
@@ -139,7 +139,7 @@
 ,Regular,isPasswordValid,Ensures the user has a secure password.,public,none,boolean,Standard security check ( length > 8).
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
-,PayrollCalculator,finalGross,Returns the gross pay by delegating to the employee’s own CalculatePay(),public,Employee emp,double,Reads no fields directly. Polymorphism picks the right role formula.
+,PayrollCalculator,finalGross,Returns the gross pay by delegating to the employee’s own calculatePay(),public,Employee emp,double,Reads no fields directly. Polymorphism picks the right role formula.
 ,PayrollCalculator,finalSSS,Determines the SSS deduction using the 2024/2025 statutory table.,public,double gross,double,"Logic Hiding: Contains the actual bracket logic (the 29,750 cap)."
 ,PayrollCalculator,finalPhilHealth,Calculates the PhilHealth premium (currently 5% of basic salary).,public,double basic,double,Compliance: Implements the 50/50 employer-employee split logic.
 ,PayrollCalculator,finalPagIBIG,Calculates the Pag-IBIG contribution.,public,double gross,double,Rule: Usually a fixed 100.00 or 2% capped at a certain amount.
@@ -161,7 +161,7 @@
 ,PayrollProcessor,calculateTotalHoursWorked,Aggregates raw attendance logs for a specific pay period.,public,none,double,Logic: Must pull from Attendance; result must be ≥0.
 ,PayrollProcessor,calculateGrossSalary,Computes total pay before any statutory deductions.,public,none,double,Formula: (HourlyRate×Hours)+Allowances.
 ,PayrollProcessor,getNetPay,"Computes the final ""Take Home"" pay.",public,none,double,Firewall: Logic must ensure Net Pay is never negative.
-,PayrollProcessor,CalculatePay,The high-level trigger that runs the full pay logic. ,public,none,double,getHourlyRate() × hoursWorked + allowances
+,PayrollProcessor,calculatePay,The high-level trigger that runs the full pay logic. ,public,none,double,getHourlyRate() × hoursWorked + allowances
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,Payslip,Payslip,Creates one printable payslip for an employee and cut-off period.,public,"PayrollBreakdown breakdown, String employeeName, String position, String cutOff",Constructor,All four values required. Fields are private final. cutOff must not be blank.
@@ -237,7 +237,7 @@
 ,SystemSupportHub,checkSystemHealth,Check whether the payroll data store/system is operational (“healthy”).,public,none,boolean,Abstraction: Verifies operational status of the payroll data source without exposing employee records or financial information.
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
-,LeaveHub,applyLeave,Submits a new leave request for processing within the payroll system.,public,"String leaveID, int empNo, LocalDate startDate, LocalDate endDate",LeaveRequest,Abstraction and Workflow Separation: Defines the standardized method for filing a leave request without embedding approval authority; ensures consistent leave submission structure across all implementing roles.
+,LeaveHub,applyLeave,Submits a new leave request for processing within the payroll system.,public,"String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String reason",LeaveRequest,Abstraction and Workflow Separation: Defines the standardized method for filing a leave request without embedding approval authority; ensures consistent leave submission structure across all implementing roles.
 ,LeaveHub,updateLeaveStatus,Updates the status of an existing leave request (APPROVED or REJECTED).,public,"String leaveID, String newStatus",void,"Enforces that status changes occur only through authorized workflow operations, maintaining separation between leave filing and approval authority"
 ,LeaveHub,viewAllLeaveRequests,To retrieve the master list of all requests for review.,public,none,List<LeaveRequest>,Required for Admin/HR roles to audit the company's availability.
 ,,,,,,,

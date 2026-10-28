@@ -32,4 +32,39 @@ public class Attendance {
     public LocalTime getTimeOut() {
         return timeOut;
     }
+
+    // ---------------------- Additional Methods ----------------------
+
+    public double getLateMinutes() {
+        // *Computed by private logic, never supplied from outside.
+        // Assumption: start 08:00 with a 10-minute grace period (confirm against
+        // MotorPH policy).Returns 0 if on time. */
+        LocalTime officialStartTime = LocalTime.of(8, 0);
+        LocalTime gracePeriodEnd = officialStartTime.plusMinutes(10);
+
+        if (timeIn.isAfter(gracePeriodEnd)) {
+            return java.time.Duration.between(gracePeriodEnd, timeIn).toMinutes() > 0
+                    ? java.time.Duration.between(gracePeriodEnd, timeIn).toMinutes()
+                    : 0;
+        } else {
+            return 0;
+        }
+    }
+
+    public double getTotalHoursWorked() {
+        // Time between timeIn and timeOut less a one-hour unpaid break (assumption).
+        // Never negative.
+        java.time.Duration duration = java.time.Duration.between(timeIn, timeOut);
+        double totalHours = duration.toHours() + (double) duration.toMinutesPart() / 60;
+        return Math.max(0, totalHours - 1); // Subtract 1 hour for unpaid break
+    }
+
+    public double getOvertimeHours() {
+        // Returns 0 when no overtime. Overtime needs supervisor approval in the process
+        // flow, so the approval check belongs to the caller.
+        double totalHoursWorked = getTotalHoursWorked();
+        double regularHours = 8.0; // Assuming 8 hours is the standard workday
+        return Math.max(0, totalHoursWorked - regularHours);
+    }
+
 }

@@ -1,15 +1,11 @@
 package payrollhub.model;
 
+import java.time.LocalDate;
+
 import payrollhub.contracts.AdminHub;
 import payrollhub.contracts.UserHub;
 
-public class Admin implements AdminHub, UserHub {
-
-    private String password;
-
-    public Admin() {
-        this.password = "";
-    }
+public class Admin extends Employee implements AdminHub, UserHub {
 
     @Override
     public void updateEmployee(int id, Employee data) {
@@ -50,8 +46,101 @@ public class Admin implements AdminHub, UserHub {
         return Math.min(strength, 5);
     }
 
+    // ------------------------- Unimplemented methods -----------------------
+
+    @Override
+    public Position getRole() {
+        return Position.ADMIN;
+    }
+
+    @Override
+    public boolean authenticate(String user, String pass) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'authenticate'");
+    }
+
+    @Override
+    public boolean authenticate(String token) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'authenticate'");
+    }
+
+    @Override
+    public void resetPassword(String newPass) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'resetPassword'");
+    }
+
     @Override
     public void logout() {
-        this.password = "";
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'logout'");
     }
+
+    @Override
+    public void addEmployee(Employee emp) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addEmployee'");
+    }
+
+    @Override
+    public int generateNextEmpNo() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateNextEmpNo'");
+    }
+
+    @Override
+    public boolean isEmployeeValid(Employee emp) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isEmployeeValid'");
+    }
+
+    @Override
+    public double calculatePay() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'calculatePay'");
+    }
+
+    @Override
+    public double getSssDeduction(double gross) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getSssDeduction'");
+    }
+
+    @Override
+    public double getPagibigDeduction(double gross) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getPagibigDeduction'");
+    }
+
+    @Override
+    public double getWithholdingTax(double gross) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getWithholdingTax'");
+    }
+
+    @Override
+    public double getPhilHealthDeduction(double gross) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getPhilHealthDeduction'");
+    }
+
+    @Override
+    public void logout(String token) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'logout'");
+    }
+
+    @Override
+    public void applyLeave(String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String reason) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'applyLeave'");
+    }
+
+    @Override
+    public double calculateTotalHoursWorked() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'calculateTotalHoursWorked'");
+    }
+
 }
