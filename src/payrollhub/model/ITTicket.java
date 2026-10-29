@@ -94,7 +94,16 @@ public class ITTicket {
     }
 
     // Values containing commas must be quoted.
-    public String toCSV(
+    public String toCSV() {
+        return String.format("%d,%d,%s,%s,%s,%s,%s", ticketID, empNo, quoteIfNeeded(issueType),
+                quoteIfNeeded(description), status, dateCreated, dateResolved);
+    }
 
-    );
+    private String quoteIfNeeded(String value) {
+        if (value != null && value.contains(",")) {
+            return "\"" + value + "\"";
+        }
+        return value;
+    }
+
 }

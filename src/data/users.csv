@@ -1,14 +1,14 @@
 empNo,userName,password,role
-10001,manuelg,Motorph123,Chief Admin
-10002,antoniol,Motorph123,Chief Admin
-10003,biancaa,Motorph123,Chief Admin
-10004,isabellar,Motorph123,Chief Admin
+10001,manuelg,Motorph123,Admin
+10002,antoniol,Motorph123,Admin
+10003,biancaa,Motorph123,Admin
+10004,isabellar,Motorph123,Admin
 10005,eduardh,Motorph123,Regular
-10006,andreav,Motorph123,HumanResources Admin
+10006,andreav,Motorph123,HumanResources
 10007,brads,Motorph123,HumanResources
 10008,alicer,Motorph123,HumanResources
 10009,rosiea,Motorph123,HumanResources
-10010,rodericka,Motorph123,Accounting Admin
+10010,rodericka,Motorph123,Accounting
 10011,anthonys,Motorph123,Accounting
 10012,josiel,Motorph123,Accounting
 10013,marthaf,Motorph123,Accounting
