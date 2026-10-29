@@ -7,6 +7,15 @@ import payrollhub.contracts.UserHub;
 
 public class Admin extends Employee implements AdminHub, UserHub {
 
+    protected Admin(int empNo, String lastName, String firstName, String address, String phone, LocalDate birthday,
+            String supervisor, String status, String position, String sss, String philhealth, String tin,
+            String pagibig, double basicSalary, double riceSubsidy, double phoneAllowance, double clothingAllowance) {
+        super(empNo, lastName, firstName, address, phone, birthday, supervisor, status, position, sss, philhealth, tin,
+                pagibig,
+                basicSalary, riceSubsidy, phoneAllowance, clothingAllowance);
+        // TODO Auto-generated constructor stub
+    }
+
     @Override
     public void updateEmployee(int id, Employee data) {
         // TODO: implement employee update

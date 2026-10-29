@@ -46,8 +46,6 @@ public final class GUIUser {
     }
 
     private boolean isHumanResources() {
-        return role.equalsIgnoreCase("HR")
-                || role.equalsIgnoreCase("HumanResources")
-                || role.equalsIgnoreCase("Human Resources");
+        return role.equalsIgnoreCase("HumanResources");
     }
 }

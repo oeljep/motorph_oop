@@ -8,6 +8,15 @@ import payrollhub.contracts.UserHub;
 
 public class Accounting extends Employee implements FinanceHub, UserHub {
 
+    protected Accounting(int empNo, String lastName, String firstName, String address, String phone, LocalDate birthday,
+            String supervisor, String status, String position, String sss, String philhealth, String tin,
+            String pagibig, double basicSalary, double riceSubsidy, double phoneAllowance, double clothingAllowance) {
+        super(empNo, lastName, firstName, address, phone, birthday, supervisor, status, position, sss, philhealth, tin,
+                pagibig,
+                basicSalary, riceSubsidy, phoneAllowance, clothingAllowance);
+        // TODO Auto-generated constructor stub
+    }
+
     @Override
     public void batchProcessPayroll(String payPeriod) {
         // TODO: implement batch payroll processing

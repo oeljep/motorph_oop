@@ -3,7 +3,6 @@ package payrollhub.model;
 import java.time.LocalDate;
 
 import payrollhub.contracts.SystemSupportHub;
-import payrollhub.model.Position;
 
 public class InfoTech extends Employee implements SystemSupportHub {
 

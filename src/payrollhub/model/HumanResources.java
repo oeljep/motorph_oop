@@ -7,6 +7,7 @@ import java.util.List;
 import payrollhub.contracts.HRHub;
 import payrollhub.contracts.LeaveHub;
 import payrollhub.model.Position;
+import payrollhub.model.LeaveRequest;
 
 public class HumanResources extends Employee implements HRHub, LeaveHub {
 
@@ -84,13 +85,6 @@ public class HumanResources extends Employee implements HRHub, LeaveHub {
     }
 
     @Override
-    public LeaveRequest applyLeave(String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String type,
-            String reason) throws IOException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'applyLeave'");
-    }
-
-    @Override
     public double getSssDeduction(double gross) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getSssDeduction'");
@@ -151,14 +145,21 @@ public class HumanResources extends Employee implements HRHub, LeaveHub {
     }
 
     @Override
-    public void applyLeave(String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String reason) {
+    public double calculateTotalHoursWorked() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'calculateTotalHoursWorked'");
+    }
+
+    @Override
+    public LeaveRequest applyLeave(String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String type,
+            String reason) throws IOException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'applyLeave'");
     }
 
     @Override
-    public double calculateTotalHoursWorked() {
+    public void applyLeave(String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String reason) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calculateTotalHoursWorked'");
+        throw new UnsupportedOperationException("Unimplemented method 'applyLeave'");
     }
 }

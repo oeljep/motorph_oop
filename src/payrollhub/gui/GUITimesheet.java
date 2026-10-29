@@ -25,6 +25,13 @@ public class GUITimesheet extends JFrame {
             new AttendanceService(CsvHandler.ATTENDANCE_FILE.toString());
     private final DefaultTableModel tableModel = new DefaultTableModel(
             new String[] { "Date", "Time in", "Time out", "Hours worked" }, 0) {
+        /**
+         * Keeps attendance rows read-only so the table cannot bypass attendance services.
+         *
+         * @param row the row being checked
+         * @param column the column being checked
+         * @return {@code false} because timesheet values are not edited directly
+         */
         @Override
         public boolean isCellEditable(int row, int column) {
             return false;
@@ -36,6 +43,10 @@ public class GUITimesheet extends JFrame {
     private final JButton employeeManagementButton = GUIUtility.createNavButton("Employee management");
     private GUIUser loggedIn;
 
+    /**
+     * Builds the timesheet window, adds its header, attendance table, and actions,
+     * then loads the months available in attendance records.
+     */
     public GUITimesheet() {
         super("Payroll Hub - Timesheet");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -48,6 +59,12 @@ public class GUITimesheet extends JFrame {
         loadAvailableMonths();
     }
 
+    /**
+     * Creates the header with the screen title, signed-in employee label, and month
+     * selector; changing the selected month refreshes the attendance table.
+     *
+     * @return the configured header panel
+     */
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout(10, 8));
         header.setBorder(javax.swing.BorderFactory.createEmptyBorder(12, 16, 0, 16));
@@ -61,6 +78,12 @@ public class GUITimesheet extends JFrame {
         return header;
     }
 
+    /**
+     * Creates the action buttons and connects each one to its attendance or
+     * navigation workflow; employee management is shown only when permitted.
+     *
+     * @return the configured action panel
+     */
     private JPanel createActions() {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton checkInButton = GUIUtility.createButton("Check in", new java.awt.Color(40, 110, 75));
@@ -84,6 +107,13 @@ public class GUITimesheet extends JFrame {
         return actions;
     }
 
+    /**
+     * Sets the current user, updates their displayed identity and management
+     * permissions, and loads their attendance for the selected month.
+     *
+     * @param emp the signed-in user
+     * @throws IllegalArgumentException if {@code emp} is {@code null}
+     */
     public void setLoggedIn(GUIUser emp) {
         if (emp == null) {
             throw new IllegalArgumentException("A signed-in user is required.");
@@ -96,6 +126,10 @@ public class GUITimesheet extends JFrame {
         reloadTable();
     }
 
+    /**
+     * Records the current user's check-in time, refreshes the available months
+     * and table, and displays an error if recording fails.
+     */
     private void checkIn() {
         if (loggedIn == null) {
             showError("Sign in before recording attendance.");
@@ -110,6 +144,10 @@ public class GUITimesheet extends JFrame {
         }
     }
 
+    /**
+     * Records the current user's check-out time, refreshes the table, and displays
+     * an error if recording fails or no user is signed in.
+     */
     private void checkOut() {
         if (loggedIn == null) {
             showError("Sign in before recording attendance.");
@@ -123,6 +161,10 @@ public class GUITimesheet extends JFrame {
         }
     }
 
+    /**
+     * Loads months represented in the attendance data, selects the previously
+     * selected month when available, and otherwise selects the current month.
+     */
     private void loadAvailableMonths() {
         try {
             List<String> months = CsvHandler.loadAvailableMonths(CsvHandler.ATTENDANCE_FILE.toString());
@@ -142,6 +184,10 @@ public class GUITimesheet extends JFrame {
         }
     }
 
+    /**
+     * Clears the table and reloads the signed-in user's attendance for the selected
+     * month, displaying worked hours only when both time values are present.
+     */
     private void reloadTable() {
         tableModel.setRowCount(0);
         if (loggedIn == null || monthSelector.getSelectedItem() == null) {
@@ -163,6 +209,10 @@ public class GUITimesheet extends JFrame {
         }
     }
 
+    /**
+     * Opens the leave-request screen for the signed-in user and closes this window;
+     * if there is no signed-in user, shows an error instead.
+     */
     private void openLeaveScreen() {
         if (loggedIn == null) {
             showError("Sign in before opening leave requests.");
@@ -172,11 +222,19 @@ public class GUITimesheet extends JFrame {
         dispose();
     }
 
+    /**
+     * Returns to the login screen and closes the current timesheet window.
+     */
     private void signOut() {
         new GUILogin().setVisible(true);
         dispose();
     }
 
+    /**
+     * Displays an error dialog associated with this timesheet window.
+     *
+     * @param message the error message to show
+     */
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Timesheet", JOptionPane.ERROR_MESSAGE);
     }
