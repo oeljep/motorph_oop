@@ -117,7 +117,8 @@ public class LeaveService implements LeaveHub {
     private LeaveRequest toLeaveRequest(String[] row) {
         try {
             return new LeaveRequest(row[0], Integer.parseInt(row[1]), row[2],
-                    LocalDate.parse(row[3]), LocalDate.parse(row[4]), row[5], row[6]);
+                    LocalDate.parse(row[3]), LocalDate.parse(row[4]), row[5], row[6]) {
+            };
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("Malformed leave request record.", e);
         }

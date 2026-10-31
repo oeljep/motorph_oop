@@ -21,18 +21,18 @@ public class Payslip {
      * @throws IllegalArgumentException if any value is missing or blank
      */
     public Payslip(PayrollBreakdown breakdown, String employeeName,
-                   String position, String cutOff) {
+            String position, String cutOff) {
         if (breakdown == null) {
-            throw new IllegalArgumentException("breakdown is required");
+            throw new IllegalArgumentException("Breakdown is required");
         }
         if (employeeName == null || employeeName.trim().isEmpty()) {
-            throw new IllegalArgumentException("employeeName is required");
+            throw new IllegalArgumentException("Employee name is required");
         }
         if (position == null || position.trim().isEmpty()) {
-            throw new IllegalArgumentException("position is required");
+            throw new IllegalArgumentException("Position is required");
         }
         if (cutOff == null || cutOff.trim().isEmpty()) {
-            throw new IllegalArgumentException("cutOff must not be blank");
+            throw new IllegalArgumentException("Cut off must not be blank");
         }
         this.breakdown = breakdown;
         this.employeeName = employeeName.trim();

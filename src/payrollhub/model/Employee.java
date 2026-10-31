@@ -319,7 +319,7 @@ public abstract class Employee {
     /**
      * Initiates the leave request process.
      */
-    public abstract void applyLeave(String leaveID, int empNo, LocalDate startDate,
+    public abstract LeaveRequest applyLeave(String leaveID, int empNo, LocalDate startDate,
             LocalDate endDate, String reason);
 
     /**

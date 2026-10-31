@@ -16,7 +16,7 @@ public class LogoutHandler {
 
     public void logout(JFrame currentForm) {
 
-        // open the Login GUI
+        // Open the Login GUI
         GUILogin loginForm = new GUILogin();
         loginForm.setVisible(true);
 

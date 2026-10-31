@@ -131,7 +131,7 @@ public class Accounting extends Employee implements FinanceHub, UserHub {
     }
 
     @Override
-    public void applyLeave(String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String reason) {
+    public LeaveRequest applyLeave(String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String reason) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'applyLeave'");
     }
