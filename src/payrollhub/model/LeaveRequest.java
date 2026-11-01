@@ -2,14 +2,14 @@ package payrollhub.model;
 
 import java.time.LocalDate;
 
-public class LeaveRequest {
+public abstract class LeaveRequest {
 
     private final String leaveID;
     private final int employeeID;
     private final String type;
     private final LocalDate startDate;
     private final LocalDate endDate;
-    private final String status;
+    private String status;
     private final String reason;
 
     public LeaveRequest(String leaveID, int employeeID, String type,
@@ -50,4 +50,28 @@ public class LeaveRequest {
     public String getReason() {
         return reason;
     }
+
+    public String setStatus(String newStatus) {
+        if (newStatus == null || newStatus.isEmpty()) {
+            throw new IllegalArgumentException("Status is required.");
+        }
+        this.status = newStatus;
+        return this.status;
+    }
+
+    public void approve() {
+        setStatus("APPROVED");
+    }
+
+    public void reject() {
+        setStatus("REJECTED");
+    }
+
+    // Ensures that the end date is not earlier than the start date.
+    private void validateDates() {
+        if (endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("End date cannot be earlier than start date.");
+        }
+    }
+
 }
