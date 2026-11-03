@@ -1,11 +1,13 @@
 package payrollhub.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridLayout;
 import java.awt.FontMetrics;
 import java.awt.RenderingHints;
 import java.util.Arrays;
@@ -15,11 +17,15 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 /**
- * Shared look-and-feel helpers for every Payroll Hub screen.
+ * Shared look-and-feel helpers for every Payroll Hub screen. The static
+ * factory methods hold no state. The "Figma design tokens" block at the top
+ * keeps the prototype's colors and fonts in one place so screens never
+ * hard-code them.
  */
 public class GUIUtility {
 
@@ -37,10 +43,10 @@ public class GUIUtility {
     /** Text color typed into input fields. */
     public static final Color FIELD_TEXT = new Color(0x1E1E1E);
 
-    /** Page background behind cards. */
+    /** Page background behind cards. TODO: confirm against the Figma canvas. */
     public static final Color PAGE_BACKGROUND = new Color(0xF5F5F5);
 
-    /** Sidebar background. */
+    /** Sidebar background. TODO: confirm against the Figma "Menu" frame fill. */
     public static final Color SIDEBAR_BACKGROUND = new Color(0xEFEFEF);
 
     /** Fill of the selected sidebar button (Figma #C9C9C9). */
@@ -55,10 +61,7 @@ public class GUIUtility {
     /** Muted text for captions and labels. */
     public static final Color MUTED_TEXT = new Color(0x6B6B6B);
 
-    /**
-     * Figma pixels are multiplied by this to get screen pixels in the shell
-     * screens.
-     */
+    /** Figma pixels are multiplied by this to get screen pixels in the shell screens. */
     public static final double SCALE = 0.8;
 
     /**
@@ -71,7 +74,7 @@ public class GUIUtility {
         return (int) Math.round(designPixels * SCALE);
     }
 
-    private static final String[] BODY_FONTS = { "Inter", "Segoe UI", "SansSerif" };
+    private static final String[] BODY_FONTS ={ "Inter", "Segoe UI", "SansSerif" };
     private static final String[] HEADING_FONTS = { "Merriweather", "Georgia", "Serif" };
 
     private GUIUtility() {
@@ -143,6 +146,27 @@ public class GUIUtility {
         return label;
     }
 
+    public static JPanel createTitledPanel(String title) {
+        JPanel panel = new JPanel(new BorderLayout(8, 8));
+        panel.setBorder(BorderFactory.createTitledBorder(title));
+        return panel;
+    }
+
+    public static JPanel createEmployeeInfoPanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 2, 12, 0));
+        panel.add(createPersonalInfoPanel());
+        panel.add(createFinancialInfoPanel());
+        return panel;
+    }
+
+    public static JPanel createPersonalInfoPanel() {
+        return createTitledPanel("Personal information");
+    }
+
+    public static JPanel createFinancialInfoPanel() {
+        return createTitledPanel("Salary and allowances");
+    }
+
     // ---------------------- Figma-styled components ----------------------
 
     /**
@@ -206,6 +230,102 @@ public class GUIUtility {
         button.setMargin(new java.awt.Insets(0, 0, 0, 0));
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return button;
+    }
+
+    // ---------------------- Shared screen pieces ----------------------
+
+    /**
+     * Formats an amount as pesos with thousands separators and two decimals.
+     *
+     * @param amount the amount
+     * @return text such as "₱1,234.50"
+     */
+    public static String formatPeso(double amount) {
+        return "₱" + String.format(java.util.Locale.US, "%,.2f", amount);
+    }
+
+    /**
+     * Creates the large page title used at the top of every tab.
+     *
+     * @param text the title
+     * @return the styled label
+     */
+    public static JLabel createPageTitle(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(bodyFont(Font.BOLD, scale(30)));
+        label.setForeground(FIELD_TEXT);
+        return label;
+    }
+
+    /**
+     * Applies the shared table look: flat grid, taller rows, bold header,
+     * soft maroon selection.
+     *
+     * @param table the table to style
+     */
+    public static void styleTable(javax.swing.JTable table) {
+        table.setFont(bodyFont(Font.PLAIN, 13f));
+        table.setRowHeight(scale(36));
+        table.setShowVerticalLines(false);
+        table.setGridColor(BORDER);
+        table.setSelectionBackground(new Color(0xF3DDE3));
+        table.setSelectionForeground(FIELD_TEXT);
+        table.setFillsViewportHeight(true);
+        javax.swing.table.JTableHeader header = table.getTableHeader();
+        header.setFont(bodyFont(Font.BOLD, 13f));
+        header.setBackground(Color.WHITE);
+        header.setReorderingAllowed(false);
+    }
+
+    /**
+     * Wraps a table in a scroll pane with the shared border and a white background.
+     *
+     * @param table the table to wrap
+     * @return the scroll pane
+     */
+    public static javax.swing.JScrollPane wrapTable(javax.swing.JTable table) {
+        javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(table);
+        scroll.setBorder(BorderFactory.createLineBorder(BORDER));
+        scroll.getViewport().setBackground(Color.WHITE);
+        return scroll;
+    }
+
+    /**
+     * Creates a padded, rounded action button for the toolbars of the tab screens.
+     *
+     * @param text       the label
+     * @param background the fill color
+     * @return the styled button
+     */
+    public static JButton createActionButton(String text, Color background) {
+        JButton button = createPillButton(text, background, 22);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+        return button;
+    }
+
+    /**
+     * Creates a white, rounded card with a thin border, for grouping content.
+     *
+     * @param layout the layout manager for the card's content
+     * @return the card panel; add content to it directly
+     */
+    public static JPanel createCardPanel(java.awt.LayoutManager layout) {
+        JPanel card = new JPanel(layout) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int arc = scale(24);
+                g2.setColor(CARD_BACKGROUND);
+                g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, arc, arc);
+                g2.setColor(BORDER);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, arc, arc);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(BorderFactory.createEmptyBorder(scale(20), scale(24), scale(20), scale(24)));
+        return card;
     }
 
     // ---------------------- Painting helpers ----------------------

@@ -38,7 +38,7 @@ public class GUISidebar extends JPanel {
     /**
      * Creates the sidebar.
      *
-     * @param role     the signed-in user's role, used to determine allowed tabs
+    * @param role     the signed-in user's role, used to determine allowed tabs
      * @param onSelect runs with the tab the user clicks
      */
     public GUISidebar(String role, Consumer<NavTab> onSelect) {
@@ -72,6 +72,14 @@ public class GUISidebar extends JPanel {
         }
         buttons.forEach((key, button) -> button.setActive(key == tab));
         onSelect.accept(tab);
+    }
+
+    /**
+     * Removes the highlight from every tab, for screens that are not a tab
+     * (such as the profile page). Does not change what is shown.
+     */
+    public void clearSelection() {
+        buttons.values().forEach(button -> button.setActive(false));
     }
 
     // ---------------------- Button ----------------------

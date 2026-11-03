@@ -1,140 +1,106 @@
 # Payroll Hub
 
-A Java desktop payroll system for **MotorPH**, built with object-oriented programming. Payroll Hub handles employee records, time tracking, leave filing and approval, statutory deductions, and payslip generation through a Swing GUI, with data stored in CSV files.
+Payroll Hub is a Java 17 Swing payroll application for MotorPH. The GUI is connected to a local CSV data layer: employee, account, attendance, and leave operations use `CsvHandler`; attendance writes are validated by `AttendanceService`; and payslip views use `PayslipCalculator` and `PayrollCalculator`.
 
 > **MO-IT110 Object-Oriented Programming · Milestone 1**
+>
 > Mapúa-Malayan Digital College · Section S2101 · Group 7
 
----
+## Current implementation status
+
+| Area | Current status |
+|---|---|
+| Sign-in and role-based navigation | Implemented. `UserService` authenticates against `users.csv`; `NavAccess` controls which dashboard tabs are available. |
+| Employee records | Implemented. Search, view, add, edit, and delete screens use `CsvHandler`; add/delete and edit controls vary by role. |
+| Time tracker | Implemented. Employees can clock in/out and review their own attendance history. `AttendanceService` writes records; `AttendanceRules` supplies late-minute and paid-hour calculations. |
+| Leave requests | Implemented. Users can file and view requests; authorized Admin/HR roles can approve or reject other employees’ requests. Data is persisted in `leaves.csv`. |
+| Payslip and payroll screens | Connected to employee and attendance data. The payroll calculation rules and attendance/pay assumptions still require review against the course/source payroll policy before treating the output as production-verified. |
+| Ticket manager | Implemented in the GUI/data layer. Tickets are persisted to `src/data/tickets.csv`, created on first filing; replies and status updates are saved. |
+| Password recovery | Implemented through the login recovery flow and `UserService`. It is not an IT staff dashboard. |
+| IT operations and overtime approval | Not currently available as dashboard workflows. Overtime is shown as requiring supervisor approval; no approval action is implemented. |
+
+The current source was verified with a Java 17 compile and the read-only `GuiBackendIntegrationTest`. The existing legacy test mains still contain failures in employee-data assertions and payroll rule expectations; those are not represented as passing. Maven was unavailable in the validation environment, so `mvn test` was not run.
 
 ## Features
 
-- **Role-based login.** One login screen for everyone; the dashboard that opens is derived from the authenticated user's role, not chosen by the user.
-- **Employee management.** View, search, add, update and delete employee records (Admin / HR).
-- **Timesheet.** Employees record time in and time out; late minutes, hours worked and overtime are computed from the attendance record.
-- **Leave management.** Staff file leave requests; Admin and HR approve or reject them.
-- **Payroll computation.** Gross pay, SSS, PhilHealth, Pag-IBIG, withholding tax (TRAIN Law) and net pay.
-- **Payslips.** Generate a payslip for a chosen cut-off period.
-- **Credential reset.** IT staff handle password resets, and users get a recovery screen that never reveals the stored password.
+- Role-based sign-in and dashboard tabs.
+- Employee search, profile viewing, and role-limited add/edit/delete actions.
+- Employee self-service clock in/out and monthly attendance history.
+- Leave filing, calendar display, and role-limited approval/rejection.
+- Employee payslip display and accounting payroll table/export.
+- Ticket filing from payslip concerns and ticket response/status handling.
+- Password recovery using account and employee identity details.
 
-## User roles
+## Dashboard access
 
-| Role | Class | What they can do |
-|---|---|---|
-| Admin | `Admin` | Add, update and remove employees; approve or reject leave |
-| Human Resources | `HumanResources` | Update employee details; review and decide leave requests |
-| Accounting | `Accounting` | Batch payroll, payslips, tax and deduction reports |
-| IT | `InfoTech` | Reset credentials, check system health |
-| Regular Staff | `Regular` | View own profile and salary, time in/out, file leave |
+Every recognized role gets Dashboard, Time Tracker, Schedule, and Payslip tabs. `NavAccess` additionally exposes:
+
+| Role in `users.csv` | Additional tabs |
+|---|---|
+| `Admin` | Employees, Ticket Manager |
+| `HumanResources` / `HumanResources Admin` | Employees, Ticket Manager |
+| `Accounting` | Payroll Manager, Ticket Manager |
+| `Accounting Admin` / `Chief Admin` | Employees, Payroll Manager, Ticket Manager |
+| `Regular`, `InfoTech`, or an unrecognized role | No management tabs |
+
+Action permissions are separately checked by `ActionAccess`. In the current implementation, Admin/Chief Admin may add or delete employees; HR can edit; Admin/HR can decide leave. The `InfoTech` model class exists, but an IT management tab is not currently exposed.
 
 ## OOP design
 
-The design package (CRC cards and Method Dictionary) is organized by OOP pillar.
+The project’s CRC cards and Method Dictionary are maintained in [`src/docs/crc-method-dictionary.csv`](./src/docs/crc-method-dictionary.csv); the CSV layouts and field rules are in [`src/docs/data-dictionary.md`](./src/docs/data-dictionary.md).
 
-| Pillar | How it is applied |
+| Pillar | Current application |
 |---|---|
-| **Encapsulation** | Identity and credentials are `private`; salary fields are `protected`. Setters validate input. `PayrollBreakdown` is immutable (`private final`, no setters). `LeaveRequest` always starts as `PENDING`. |
-| **Abstraction** | `Employee` is abstract. Interfaces define role contracts: `UserHub`, `AdminHub`, `HRHub`, `FinanceHub`, `SystemSupportHub`, `LeaveHub`, `PayrollProcessor`. |
-| **Inheritance** | `Admin`, `HumanResources`, `Accounting`, `InfoTech` and `Regular` extend `Employee` and call `super(...)` to initialize shared identity and pay fields. |
-| **Polymorphism** | Overriding: each role provides its own `CalculatePay()`. Overloading: `authenticate(user, pass)` / `authenticate(token)`, `generatePayslip(...)`, `resetCredentials(...)`, `sumDeductions(...)`. A generic `Employee` is cast to an interface (for example `LeaveHub`) to unlock role-specific actions. |
+| **Encapsulation** | Employee and record data are represented by model/data classes; validation is performed by their constructors/setters and service/data operations. |
+| **Abstraction** | `Employee` is abstract, and role/service contracts are defined in interfaces such as `UserHub`, `AdminHub`, `HRHub`, `FinanceHub`, `SystemSupportHub`, `LeaveHub`, and `PayrollProcessor`. |
+| **Inheritance** | Role models including `Admin`, `HumanResources`, `Accounting`, `InfoTech`, and `Regular` derive from `Employee`. |
+| **Polymorphism** | Role/model implementations provide payroll and workflow behavior through overrides and overloaded contract methods. The GUI itself uses role-based `NavAccess` and `ActionAccess` checks rather than relying on `instanceof` checks for tab permissions. |
 
 ## Project structure
 
-```
-PayrollHub/
-├── pom.xml
-├── nbactions.xml
-├── src/
-│   ├── data/
-│   │   ├── employee.csv
-│   │   ├── attendance.csv
-│   │   ├── leaves.csv
-│   │   └── users.csv
-│   ├── docs/
-│   └── payrollhub/
-│       ├── Main.java        # Application entry point; launches the Swing login screen
-│       ├── model/                    # Employee hierarchy and domain objects
-│       │   ├── Employee.java
-│       │   ├── Admin.java
-│       │   ├── HumanResources.java
-│       │   ├── Accounting.java
-│       │   ├── InfoTech.java
-│       │   ├── Regular.java
-│       │   ├── Position.java
-│       │   ├── LeaveRequest.java
-│       │   ├── Attendance.java
-│       │   ├── PayrollBreakdown.java
-│       │   ├── Payslip.java
-│       │   ├── SummaryData.java
-│       │   └── ITTicket.java
-│       ├── contracts/                # Interfaces
-│       │   ├── UserHub.java
-│       │   ├── AdminHub.java
-│       │   ├── HRHub.java
-│       │   ├── FinanceHub.java
-│       │   ├── SystemSupportHub.java
-│       │   ├── LeaveHub.java
-│       │   └── PayrollProcessor.java
-│       ├── service/
-│       │   ├── PayrollCalculator.java
-│       │   ├── AttendanceService.java
-│       │   ├── LeaveService.java
-│       │   ├── UserService.java
-│       │   └── LogoutHandler.java
-│       ├── data/                     # File layer
-│       │   ├── CsvHandler.java
-│       │   └── EmployeeData.java
-│       └── gui/                      # Swing screens
-│           ├── GUILogin.java
-│           ├── GUIForgotPass.java
-│           ├── GUIDashboard.java
-│           ├── GUITimesheet.java
-│           ├── GUILeave.java
-│           ├── GUIUtility.java
-│           └── GUIUser.java
-└── README.md
+```text
+src/
+├── data/                         # employee.csv, attendance.csv, leaves.csv, users.csv
+├── docs/                         # CRC/method and data dictionaries
+└── payrollhub/
+    ├── Main.java                 # Swing application entry point
+    ├── contracts/                # Role and service interfaces
+    ├── data/                     # CsvHandler and GUI/backend record objects
+    ├── gui/                      # Login, dashboard, and feature screens
+    ├── model/                    # Employee hierarchy and domain models
+    ├── service/                  # Authentication, attendance, leave, payroll services
+    └── test/                     # Dependency-free test/integration entry points
 ```
 
-## Data files
+## Data storage
 
-Employee and attendance data come from the MotorPH dataset. All reading and writing goes through `CsvHandler`, so no screen parses CSV on its own. `EmployeeData` carries one employee row (17 fields) between the file layer and the GUI. CSV files are stored in `src/data/`.
+All application records are stored in CSV files under `src/data/`, relative to the project root. `CsvHandler` centralizes CSV access; screens do not parse files directly. The checked-in files are `employee.csv`, `attendance.csv`, `leaves.csv`, and `users.csv`. `tickets.csv` is created when the first ticket is saved. There is no remote API or database connection.
+
+See the [data dictionary](./src/docs/data-dictionary.md) for field formats and constraints.
 
 ## Getting started
 
 ### Prerequisites
 
 - JDK 17 or later
-- Apache NetBeans 22 or later
-- Maven available to NetBeans (its bundled Maven installation is fine)
+- Maven, if using the command line or VS Code Maven launch
+- Apache NetBeans 22 or later is optional
 
-### Run in Apache NetBeans
-
-1. Open the project directory containing `pom.xml` as a Maven project.
-2. Configure the project to use JDK 17 or later and ensure NetBeans has a Maven installation selected.
-3. Select **Run Project**. The project action in `nbactions.xml` runs `payrollhub.Main`.
-
-The CSV files are read from `src/data/` relative to the project directory. Run the project from NetBeans using the project root as the working directory.
-
-### Run in VS Code
-
-1. Open the project root in VS Code with the **Extension Pack for Java** installed.
-2. Ensure Maven and JDK 17 or later are available.
-3. Run `mvn compile exec:java` from the project root.
-
-Run the app from the project root so the relative `src/data/` path resolves.
-
-### Run from the command line
+Run the application from the project root so `src/data/` resolves:
 
 ```powershell
 mvn compile exec:java
 ```
 
-## Design decisions
+In NetBeans, open the folder containing `pom.xml` as a Maven project and run `payrollhub.Main`.
 
-- **CSV over a database.** The source data are spreadsheets and CSV files, and a database would add setup without serving the OOP goals.
-- **Interface checks over role flags.** Approve/decline and add/delete controls appear only when the user's class implements the matching interface (`instanceof`), so access is enforced by the compiler rather than an editable flag.
-- **Payroll rules stay out of the GUI.** SSS, PhilHealth, Pag-IBIG and tax logic live in `PayrollCalculator`, so a UI change can never alter a computation.
-- **Stateless utilities.** `CsvHandler` and `GUIUtility` use static methods and hold no state.
+## Design decisions and limitations
+
+- **CSV storage:** CSV is used to align with the project dataset and avoid a separate database setup.
+- **Separated layers:** GUI components call the CSV data layer and payroll/attendance services; payroll calculations are not embedded in screen rendering.
+- **Role checks:** Navigation and UI actions use centralized role checks in `NavAccess` and `ActionAccess`.
+- **Payroll validation:** Existing payroll methods and current payslip output need reconciliation with the authoritative MotorPH/course policy. Existing payroll tests currently report failures; confirm the rules before relying on figures.
+- **Credential storage:** `users.csv` currently stores passwords as plaintext. This is a known security limitation; do not use real credentials.
 
 ## Team
 

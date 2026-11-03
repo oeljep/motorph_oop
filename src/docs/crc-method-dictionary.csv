@@ -369,3 +369,67 @@
 ,GUIUtility,createEmployeeInfoPanel,Builds the employee information section.,public static,none,JPanel,Combines the personal and financial panels.
 ,GUIUtility,createPersonalInfoPanel,Builds the personal details section.,public static,none,JPanel,None
 ,GUIUtility,createFinancialInfoPanel,Builds the salary and allowance section.,public static,none,JPanel,None
+
+,,,,,,,
+,Current GUI and Backend Status (verified 2026-11-04),,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,Status,GUI/backend integration,Records current implemented UI-to-data and service relationships.,documentation,none,Status,Implemented features are backed by CsvHandler and services. This section supersedes older GUI method descriptions above where signatures or behavior differ.
+,GUIDashboard,GUIDashboard,Builds the signed-in application shell.,public,GUIUser user,Constructor,Implemented. Creates header sidebar and tab content for the authenticated employee.
+,GUIDashboard,createScreen,Creates the panel assigned to a permitted navigation tab.,private,NavTab tab,JPanel,Implemented. Routes dashboard time tracker schedule payslip employee payroll and ticket screens.
+,GUIDashboard,showTab,Checks access and displays a freshly created tab screen.,private,NavTab tab,void,Implemented. Rejects tabs not returned by NavAccess for the signed-in role.
+,GUIDashboard,createDashboardHome,Builds the current welcome dashboard.,private,none,JPanel,Implemented. Shows the signed-in employee name number and role; it is not a payroll metrics dashboard.
+,GUIDashboard,showProfile,Displays the signed-in employee profile.,private,none,void,Implemented. Reads employee data through GUIViewProfile and CsvHandler.
+,NavAccess,tabsFor,Returns dashboard tabs allowed for a role.,public static,String role,"List<NavTab>",Implemented. Unknown roles receive staff tabs only.
+,NavAccess,canOpen,Checks whether a role may open a tab.,public static,"String role, NavTab tab",boolean,Implemented and used by sidebar and dashboard navigation.
+,ActionAccess,canAddOrDeleteEmployee,Checks employee add/delete permission.,public static,String role,boolean,Implemented. Admin and Chief Admin only.
+,ActionAccess,canEditEmployee,Checks employee edit permission.,public static,String role,boolean,Implemented. Admin Chief Admin and HR roles.
+,ActionAccess,canDecideLeave,Checks leave decision permission.,public static,String role,boolean,Implemented. Delegates to employee edit permission.
+,GUITimesheet,GUITimesheet,Builds the employee time tracker and attendance history.,public,int empNo,Constructor,Implemented. Loads the signed-in employee’s attendance from CsvHandler.
+,GUITimesheet,onClock,Records the employee’s current check-in or check-out.,private,none,void,Implemented. Calls CsvHandler which delegates write validation to AttendanceService.
+,GUITimesheet,refreshToday,Loads and renders today’s attendance state.,private,none,void,Implemented. Displays data read through CsvHandler.findAttendance.
+,GUITimesheet,refreshRecent,Loads recent attendance for the employee.,private,none,void,Implemented. Uses CsvHandler.loadAttendanceMonths and loadAttendance.
+,GUITimesheet,loadMonths,Loads the employee’s available attendance months.,private,none,void,Implemented. On read failure reports the error and disables the month selector.
+,GUITimesheet,loadHistory,Displays attendance rows and period totals.,private,none,void,Implemented. Reads from CsvHandler and uses AttendanceRules for paid hours and lateness.
+,GUILeave,GUILeave,Builds the calendar leave request and decision screen.,public,"String role, int empNo",Constructor,Implemented. The current form offers Vacation Sick Emergency and Personal leave types.
+,GUILeave,reload,Loads employee names and leave requests.,private,none,void,Implemented. Uses CsvHandler.loadEmployees and CsvHandler.loadLeaves; staff see their own requests.
+,GUILeave,submit,Validates and persists a new leave request.,private,none,void,Implemented. Rejects invalid date order missing reason and overlapping non-rejected requests; new status is PENDING.
+,GUILeave,decide,Approves or rejects a selected request.,private,String newStatus,void,Implemented. Restricted to approver roles and blocks self-approval.
+,GUIEmployees,GUIEmployees,Builds the searchable employee list and role-limited controls.,public,"String role, int empNo",Constructor,Implemented. Employee records are loaded through CsvHandler.
+,GUIEmployees,reload,Refreshes the employee table from storage.,private,none,void,Implemented. Reads CsvHandler.loadEmployees and reports I/O errors.
+,GUIEmployees,openForm,Opens the add or edit employee dialog.,private,EmployeeData existing,void,Implemented. Successful saves trigger a table reload.
+,GUIEmployees,deleteSelected,Deletes a selected employee and associated login.,private,none,void,Implemented. Requires add/delete permission confirmation and prevents self-deletion.
+,GUIAddEmployee,save,Validates and saves an employee record.,private,none,void,Implemented. Adds employee and login or updates existing employee through CsvHandler.
+,GUIViewProfile,GUIViewProfile,Loads and displays one employee profile.,public,int empNo,Constructor,Implemented. Reads employee data through CsvHandler and surfaces read failures.
+,GUIPayslip,showPayslip,Loads attendance and renders the selected employee payslip.,private,none,void,Implemented. Calls PayslipCalculator; payroll rules remain subject to policy and test verification.
+,GUIPayslip,reportIssue,Files a ticket for a payslip concern.,private,none,void,Implemented. Creates TicketData and persists it through CsvHandler.saveTicket.
+,GUIPayslip,createPaper,Builds a printable display panel for computed payslip data.,public static,PayslipData slip,JPanel,Implemented presentation helper. It does not calculate payroll.
+,GUIPayrollManager,loadPayroll,Calculates and displays payroll rows for a selected month.,private,none,void,Implemented wiring. Uses employee attendance CSV data and PayslipCalculator; financial correctness still requires payroll-policy verification.
+,GUIPayrollManager,exportCsv,Exports the currently loaded payroll rows.,private,none,void,Implemented. Writes the selected rows through CsvHandler.writeAll.
+,GUITicketManager,reload,Loads ticket records and employee names.,private,none,void,Implemented. Reads through CsvHandler.loadTickets and CsvHandler.loadEmployees.
+,GUITicketManager,persist,Saves a ticket reply or status change and refreshes the list.,private,TicketData ticket,boolean,Implemented. Reports persistence errors and keeps the dialog open on failure.
+,GUITicketManager,showTicket,Displays a ticket conversation and actions.,private,TicketData ticket,void,Implemented. Replies and resolved/rejected status are persisted through CsvHandler.
+,CsvHandler,loadAttendanceMonths,Lists the months with attendance for one employee.,public static,int empNo,"List<String>",Implemented. Validates row shape and attendance dates.
+,CsvHandler,loadAttendance,Loads one employee’s attendance for a selected month.,public static,"int empNo, String period","List<AttendanceData>",Implemented. Period format is yyyy-MM; malformed rows raise IOException.
+,CsvHandler,findAttendance,Finds attendance for one employee and date.,public static,"int empNo, LocalDate date","Optional<AttendanceData>",Implemented. Reads the employee’s month and returns the matching date if present.
+,CsvHandler,clockIn,Records an employee check-in.,public static,"int empNo, LocalDate date, LocalTime time",void,Implemented. Delegates duplicate-check and persistence to AttendanceService.
+,CsvHandler,clockOut,Records an employee check-out.,public static,"int empNo, LocalDate date, LocalTime time",void,Implemented. Delegates ordering and duplicate-check validation to AttendanceService.
+,CsvHandler,findUser,Finds a login by username.,public static,String username,"Optional<String[]>",Implemented. Username matching is case-insensitive.
+,CsvHandler,saveUser,Creates a login record for an employee.,public static,"int empNo, String username, String password, String role",void,Implemented. Rejects invalid fields and duplicate employee number or username.
+,CsvHandler,updatePassword,Updates the password for an employee login.,public static,"int empNo, String newPassword",void,Implemented. Passwords are currently stored in plaintext in users.csv.
+,CsvHandler,loadLeaves,Loads leave request records.,public static,none,"List<LeaveData>",Implemented. Malformed leave records are surfaced as IOException.
+,CsvHandler,nextLeaveId,Generates the next leave request ID.,public static,none,String,Implemented. Uses the L prefix and existing request IDs.
+,CsvHandler,saveLeave,Persists a new leave request.,public static,LeaveData leave,void,Implemented. Rejects duplicate leave IDs.
+,CsvHandler,updateLeaveStatus,Updates a persisted leave status.,public static,"String leaveId, String status",void,Implemented. Permits PENDING APPROVED or REJECTED.
+,CsvHandler,loadTickets,Loads support ticket records.,public static,none,"List<TicketData>",Implemented. Returns an empty list when tickets.csv does not yet exist.
+,CsvHandler,nextTicketId,Generates the next support ticket ID.,public static,none,String,Implemented. Uses the T prefix and existing ticket IDs.
+,CsvHandler,saveTicket,Persists a new support ticket.,public static,TicketData ticket,void,Implemented. Creates tickets.csv when needed and rejects duplicate IDs.
+,CsvHandler,updateTicket,Persists ticket replies and status changes.,public static,TicketData ticket,void,Implemented. Requires an existing ticket ID.
+,AttendanceService,recordTimeIn,Validates and records a check-in.,public,int empNo and LocalDateTime timeIn,void,Implemented. Rejects duplicate check-in for the same employee and date.
+,AttendanceService,recordTimeOut,Validates and records a check-out.,public,"int empNo, LocalDateTime timeOut",void,Implemented. Requires an open check-in and rejects an earlier or duplicate check-out.
+,AttendanceService,loadForMonth,Loads domain attendance records for a month.,public,"int empNo, YearMonth month","List<Attendance>",Implemented service API. Current Swing screens read AttendanceData through CsvHandler.
+,AttendanceRules,hoursWorked,Calculates paid hours from two attendance times.,public static,"LocalTime timeIn, LocalTime timeOut",double,Implemented. Subtracts the configured one-hour unpaid break.
+,AttendanceRules,lateMinutes,Calculates late minutes after the configured grace period.,public static,LocalTime timeIn,int,Implemented. Uses an 08:00 shift start and ten-minute grace period.
+,PayslipCalculator,compute,Builds payroll values for an employee and attendance period.,public static,"EmployeeData employee, List<AttendanceData> attendance, String period",PayslipData,Implemented integration. Requires matching employee and yyyy-MM period; statutory rule accuracy remains to be verified.
+,Application,Java 17 compile and GUI backend integration check,Records the current technical validation result.,verification,none,Status,Passed on 2026-11-04. Maven test command was unavailable. Legacy data and payroll test mains still report failures and are not marked passing.
+,Application,Remote service or database integration,Records external backend availability.,status,none,Status,Not implemented. Current backend is local CSV storage under src/data.
+,Application,Payroll policy and automated test reconciliation,Records remaining payroll verification work.,status,none,Status,Open. Existing payroll and employee-data test failures require investigation before payroll output is relied upon.
