@@ -334,41 +334,6 @@
 -newPass must equal confirmPass
 -newPass must pass isPasswordValid"
 ,,,,,,,
-,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
-,GUITimesheet,GUITimesheet,Builds the attendance screen.,public,none,Constructor,None
-,GUITimesheet,setLoggedIn,Tells the panel which employee is using it.,public,Employee emp,void,-emp must not be null
-,GUITimesheet,checkIn,Records time in for today.,private,none,void,Rejected if today already has a time in for this employee.
-,GUITimesheet,checkOut,Records time out for today.,private,none,void,Rejected if there is no time in yet today.
-,GUITimesheet,loadAvailableMonths,Fills the month selector from the data.,private,none,void,Uses CsvHandler.loadAvailableMonths.
-,GUITimesheet,reloadTable,Refreshes the table for the chosen month.,private,none,void,Shows late minutes and hours worked from Attendance.
-,,,,,,,
-,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
-,GUILeave,GUILeave,Builds the leave screen.,public,Employee user,Constructor,-user must not be null
-,GUILeave,submitLeaveRequest,Files a leave request for the logged-in employee.,private,none,void,"Calls validateDates, then LeaveHub.applyLeave. Status starts as PENDING."
-,GUILeave,validateDates,Checks the chosen dates.,private,"LocalDate start, LocalDate end",boolean,"-neither date may be null
--end must not be before start"
-,GUILeave,reloadLeaveTable,Refreshes the list of requests.,private,none,void,Approvers see all requests; other users see their own.
-,,,,,,,
-,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
-,GUIDashboard,GUIDashboard,Builds the employee management screen.,public,Employee user,Constructor,"-user must not be null
--buttons enabled by the user's interfaces"
-,GUIDashboard,getSelectedEmployeeNo,Returns the employee number of the selected table row.,public,none,int,Returns null if no row is selected.
-,GUIDashboard,getFormData,Reads the form into an EmployeeData object.,public,none,EmployeeData,-required fields must be filled
-,GUIDashboard,searchEmployee,Finds an employee by number and shows the record.,private,none,void,Shows a message if no match.
-,GUIDashboard,calculateSalary,Computes pay for the selected employee.,private,none,void,Calls PayrollCalculator and displays a PayrollBreakdown.
-,GUIDashboard,updateEmployee,Saves edits to the selected record.,private,none,void,Only when the user implements AdminHub or HRHub.
-,GUIDashboard,deleteSelectedRow,Deletes the selected record.,private,none,void,Admin only; asks for confirmation first.
-,GUIDashboard,reloadTable,Reloads the table from the file.,private,none,void,None
-,,,,,,,
-,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
-,GUIUtility,createButton,Builds a styled button.,public static,"String text, Color background",JButton,-text must not be null
-,GUIUtility,createNavButton,Builds a navigation button.,public static,String text,JButton,None
-,GUIUtility,createTextField,Builds a styled input field.,public static,int columns,JTextField,-columns must be positive
-,GUIUtility,createHeaderLabel,Builds a section header label.,public static,String text,JLabel,None
-,GUIUtility,createTitledPanel,Builds a panel with a titled border.,public static,String title,JPanel,None
-,GUIUtility,createEmployeeInfoPanel,Builds the employee information section.,public static,none,JPanel,Combines the personal and financial panels.
-,GUIUtility,createPersonalInfoPanel,Builds the personal details section.,public static,none,JPanel,None
-,GUIUtility,createFinancialInfoPanel,Builds the salary and allowance section.,public static,none,JPanel,None
 
 ,,,,,,,
 ,Current GUI and Backend Status (verified 2026-11-04),,,,,,
