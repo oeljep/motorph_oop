@@ -340,9 +340,11 @@
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,Status,GUI/backend integration,Records current implemented UI-to-data and service relationships.,documentation,none,Status,Implemented features are backed by CsvHandler and services. This section supersedes older GUI method descriptions above where signatures or behavior differ.
 ,GUIDashboard,GUIDashboard,Builds the signed-in application shell.,public,GUIUser user,Constructor,Implemented. Creates header sidebar and tab content for the authenticated employee.
-,GUIDashboard,createScreen,Creates the panel assigned to a permitted navigation tab.,private,NavTab tab,JPanel,Implemented. Routes dashboard time tracker schedule payslip employee payroll and ticket screens.
+,GUIDashboard,createScreen,Creates the panel assigned to a permitted navigation tab.,private,NavTab tab,JPanel,Implemented. Routes the dashboard to GUIDashboardHome and the other permitted tabs to their dedicated screens.
 ,GUIDashboard,showTab,Checks access and displays a freshly created tab screen.,private,NavTab tab,void,Implemented. Rejects tabs not returned by NavAccess for the signed-in role.
-,GUIDashboard,createDashboardHome,Builds the current welcome dashboard.,private,none,JPanel,Implemented. Shows the signed-in employee name number and role; it is not a payroll metrics dashboard.
+,GUIDashboardHome,GUIDashboardHome,Builds a role-specific dashboard overview.,public,"String role, int empNo",Constructor,Implemented. Management view is selected using NavAccess.isManagement; read failures are displayed on the panel.
+,GUIDashboardHome,buildManagementView,Displays company-level summary cards and employee table.,private,none,void,Implemented. Uses CsvHandler employee records and pending leave count; basic payroll excludes allowances.
+,GUIDashboardHome,buildPersonalView,Displays the signed-in employee’s employment and personal summary cards.,private,none,void,Implemented. Loads employee-specific latest attendance month plus own pending leave count and compensation data.
 ,GUIDashboard,showProfile,Displays the signed-in employee profile.,private,none,void,Implemented. Reads employee data through GUIViewProfile and CsvHandler.
 ,NavAccess,tabsFor,Returns dashboard tabs allowed for a role.,public static,String role,"List<NavTab>",Implemented. Unknown roles receive staff tabs only.
 ,NavAccess,canOpen,Checks whether a role may open a tab.,public static,"String role, NavTab tab",boolean,Implemented and used by sidebar and dashboard navigation.

@@ -8,7 +8,6 @@ import java.awt.GridBagLayout;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -72,7 +71,7 @@ public class GUIDashboard extends JFrame {
     private JPanel createScreen(NavTab tab) {
         switch (tab) {
             case DASHBOARD:
-                return createDashboardHome();
+                return new GUIDashboardHome(user.getRole(), user.getEmpNo());
             case TIME_TRACKER:
                 return new GUITimesheet(user.getEmpNo());
             case SCHEDULE:
@@ -89,26 +88,6 @@ public class GUIDashboard extends JFrame {
                 return createPlaceholder(tab);
         }
 
-    }
-
-    private JPanel createDashboardHome() {
-        JPanel panel = new JPanel(new BorderLayout(0, GUIUtility.scale(20)));
-        panel.setBackground(GUIUtility.PAGE_BACKGROUND);
-        panel.setBorder(BorderFactory.createEmptyBorder(
-                GUIUtility.scale(40), GUIUtility.scale(60), GUIUtility.scale(40), GUIUtility.scale(60)));
-        panel.add(GUIUtility.createPageTitle("Dashboard"), BorderLayout.NORTH);
-
-        JPanel welcome = GUIUtility.createCardPanel(new BorderLayout(0, GUIUtility.scale(10)));
-        JLabel greeting = new JLabel("Welcome, " + firstNameOf(user));
-        greeting.setFont(GUIUtility.headingFont(Font.BOLD, GUIUtility.scale(34)));
-        greeting.setForeground(GUIUtility.FIELD_TEXT);
-        JLabel details = new JLabel("Employee #" + user.getEmpNo() + "  |  " + user.getRole());
-        details.setFont(GUIUtility.bodyFont(Font.PLAIN, GUIUtility.scale(18)));
-        details.setForeground(GUIUtility.MUTED_TEXT);
-        welcome.add(greeting, BorderLayout.NORTH);
-        welcome.add(details, BorderLayout.CENTER);
-        panel.add(welcome, BorderLayout.CENTER);
-        return panel;
     }
 
     /**

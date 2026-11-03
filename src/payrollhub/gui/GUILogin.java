@@ -352,7 +352,7 @@ public class GUILogin extends JFrame {
             inner.dispose();
         }
 
-        /** Logo tilted by -4.1 degrees with a drop shadow (Figma 369:1620). */
+        /** Logo tilted by -4.1 degrees (Figma 369:1620). */
         private void paintLogo(Graphics2D g2) {
             double width = s(572.3);
             double height = s(381.5);
@@ -363,11 +363,6 @@ public class GUILogin extends JFrame {
             t.transform(AffineTransform.getRotateInstance(Math.toRadians(-4.1), centerX, centerY));
             double x = centerX - width / 2;
             double y = centerY - height / 2;
-
-            for (int i = 6; i >= 1; i--) {
-                t.setColor(new Color(0, 0, 0, 10));
-                t.fill(new RoundRectangle2D.Double(x + s(7.7) - i, y + s(3.1) - i, width + 2 * i, height + 2 * i, 8, 8));
-            }
 
             Shape box = new RoundRectangle2D.Double(x, y, width, height, 6, 6);
             if (logo == null) {

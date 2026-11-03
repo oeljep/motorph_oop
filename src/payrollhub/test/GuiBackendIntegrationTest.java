@@ -1,13 +1,21 @@
 package payrollhub.test;
 
+import java.awt.Component;
+import java.awt.Container;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 
 import payrollhub.data.AttendanceData;
 import payrollhub.data.CsvHandler;
 import payrollhub.data.EmployeeData;
 import payrollhub.data.LeaveData;
 import payrollhub.data.TicketData;
+import payrollhub.gui.GUIDashboardHome;
 import payrollhub.service.AttendanceRules;
 import payrollhub.service.PayslipCalculator;
 import payrollhub.service.PayslipData;
@@ -40,6 +48,23 @@ public final class GuiBackendIntegrationTest {
         check(AttendanceRules.lateMinutes(LocalTime.of(8, 11)) == 1,
                 "attendance calculation applies the grace period");
 
+        AtomicReference<GUIDashboardHome> managementHome = new AtomicReference<>();
+        AtomicReference<GUIDashboardHome> personalHome = new AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            managementHome.set(new GUIDashboardHome("Admin", empNo));
+            personalHome.set(new GUIDashboardHome("Regular", empNo));
+        });
+        check(containsLabel(managementHome.get(), "Payroll Overview")
+                        && containsLabel(managementHome.get(), "Pending leave requests"),
+                "management dashboard displays company overview cards");
+        JTable employeeTable = findTable(managementHome.get());
+        check(employeeTable != null && employeeTable.getRowCount() == CsvHandler.loadEmployees().size(),
+                "management dashboard table displays all employees");
+        check(containsLabel(personalHome.get(), "Basic salary")
+                        && containsLabel(personalHome.get(), "Attendance")
+                        && containsLabel(personalHome.get(), "Pending leave requests"),
+                "staff dashboard displays personal payroll, attendance and leave summaries");
+
         TicketData ticket = TicketData.newTicket("T99999", empNo, "Test subject", "Test message");
         TicketData reloaded = TicketData.fromCsvRow(ticket.toCsvRow());
         reloaded.addRemark("Test reply");
@@ -53,5 +78,32 @@ public final class GuiBackendIntegrationTest {
         if (!condition) {
             throw new AssertionError(message);
         }
+    }
+
+    private static boolean containsLabel(Container container, String text) {
+        for (Component component : container.getComponents()) {
+            if (component instanceof JLabel && ((JLabel) component).getText().contains(text)) {
+                return true;
+            }
+            if (component instanceof Container && containsLabel((Container) component, text)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static JTable findTable(Container container) {
+        for (Component component : container.getComponents()) {
+            if (component instanceof JTable) {
+                return (JTable) component;
+            }
+            if (component instanceof Container) {
+                JTable table = findTable((Container) component);
+                if (table != null) {
+                    return table;
+                }
+            }
+        }
+        return null;
     }
 }
