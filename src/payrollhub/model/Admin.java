@@ -1,9 +1,11 @@
 package payrollhub.model;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 import payrollhub.contracts.AdminHub;
 import payrollhub.contracts.UserHub;
+import payrollhub.data.CsvHandler;
 
 public class Admin extends Employee implements AdminHub, UserHub {
 
@@ -13,23 +15,86 @@ public class Admin extends Employee implements AdminHub, UserHub {
         super(empNo, lastName, firstName, address, phone, birthday, supervisor, status, position, sss, philhealth, tin,
                 pagibig,
                 basicSalary, riceSubsidy, phoneAllowance, clothingAllowance);
-        // TODO Auto-generated constructor stub
+    }
+
+    // The authority to Approve or Reject a request.
+    public void updateLeaveStatus(LeaveRequest leaveID, String newStatus) {
+        if (leaveID == null) {
+            throw new IllegalArgumentException("Leave request is required.");
+        }
+        if (newStatus == null || newStatus.trim().isEmpty()) {
+            throw new IllegalArgumentException("New status is required.");
+        }
+        leaveID.setStatus(newStatus.trim());
+    }
+
+    // Adds a new employee object to the persistent storage (CSV).
+    @Override
+    public void addEmployee(Employee employee) throws IOException {
+        if (employee == null) {
+            throw new IllegalArgumentException("Employee data is required.");
+        }
+        CsvHandler.addEmployee(employee);
+    }
+
+    // Calculates the next available unique ID for a new hire.
+    public int generateNextEmpNo() {
+        return CsvHandler.getNextEmpNo();
+    }
+
+    public boolean isEmployeeValid(Employee employee) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isEmployeeValid'");
+    }
+
+    // Modifies existing data for a specific employee in the database.
+    @Override
+    public void updateEmployee(int id, Employee employee) throws IOException {
+        if (employee == null) {
+            throw new IllegalArgumentException("Employee data is required.");
+        }
+        if (id != employee.getEmpNo()) {
+            throw new IllegalArgumentException("Employee number must match the employee data.");
+        }
+        if (!CsvHandler.updateEmployee(id, employee)) {
+            throw new IllegalArgumentException("Employee number " + id + " does not exist.");
+        }
+    }
+
+    // Deletes an employee's record from the system.
+    @Override
+    public void removeEmployee(int id) throws IOException {
+        if (id <= 0) {
+            throw new IllegalArgumentException("Employee number must be positive.");
+        }
+        if (!CsvHandler.removeEmployee(id)) {
+            throw new IllegalArgumentException("Employee number " + id + " does not exist.");
+        }
+    }
+
+    public Position getRole() {
+        return Position.ADMIN;
     }
 
     @Override
-    public void updateEmployee(int id, Employee data) {
-        // TODO: implement employee update
+    public boolean authenticate(String user, String pass) {
+
+        throw new UnsupportedOperationException("Unimplemented method 'authenticate'");
     }
 
     @Override
-    public void removeEmployee(int id) {
-        // TODO: implement employee removal
+    public double calculatePay() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'calculatePay'");
     }
 
     @Override
-    public boolean isPasswordValid(String pass) {
-        return pass != null && pass.length() >= 8;
+    public double calculateTotalHoursWorked() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'calculateTotalHoursWorked'");
     }
+
+    // ------------------------- Unimplemented methods -----------------------
 
     @Override
     public int getPasswordStrength(String pass) {
@@ -55,17 +120,9 @@ public class Admin extends Employee implements AdminHub, UserHub {
         return Math.min(strength, 5);
     }
 
-    // ------------------------- Unimplemented methods -----------------------
-
     @Override
-    public Position getRole() {
-        return Position.ADMIN;
-    }
-
-    @Override
-    public boolean authenticate(String user, String pass) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'authenticate'");
+    public boolean isPasswordValid(String pass) {
+        return pass != null && pass.length() >= 8;
     }
 
     @Override
@@ -84,30 +141,6 @@ public class Admin extends Employee implements AdminHub, UserHub {
     public void logout() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'logout'");
-    }
-
-    @Override
-    public void addEmployee(Employee emp) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addEmployee'");
-    }
-
-    @Override
-    public int generateNextEmpNo() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateNextEmpNo'");
-    }
-
-    @Override
-    public boolean isEmployeeValid(Employee emp) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isEmployeeValid'");
-    }
-
-    @Override
-    public double calculatePay() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calculatePay'");
     }
 
     @Override
@@ -145,11 +178,4 @@ public class Admin extends Employee implements AdminHub, UserHub {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'applyLeave'");
     }
-
-    @Override
-    public double calculateTotalHoursWorked() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calculateTotalHoursWorked'");
-    }
-
 }

@@ -37,15 +37,7 @@ public final class GUIUser {
         return Optional.ofNullable(employee);
     }
 
-    public boolean canManageEmployees() {
-        return role.equalsIgnoreCase("Admin") || isHumanResources();
-    }
-
     public boolean canApproveLeave() {
-        return role.equalsIgnoreCase("Admin") || isHumanResources();
-    }
-
-    private boolean isHumanResources() {
-        return role.equalsIgnoreCase("HumanResources");
+        return role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("HumanResources");
     }
 }

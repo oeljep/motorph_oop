@@ -20,4 +20,6 @@ public interface FinanceHub {
     SummaryData generateDeductionSummary(String month);
 
     void updateSalaryRates(int empNo, double newBasicSalary);
+
+    Payslip createPayslip(int empNo);
 }

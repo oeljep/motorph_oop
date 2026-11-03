@@ -14,6 +14,8 @@ import java.util.TreeSet;
 
 import javax.swing.table.DefaultTableModel;
 
+import payrollhub.model.Employee;
+
 /**
  * The only class that reads or writes the CSV files. No screen parses CSV
  * itself. All methods are static and the class holds no state.
@@ -114,7 +116,7 @@ public final class CsvHandler {
         for (String line : lines) {
             if (!headerSkipped) {
                 // Some Excel exports start with an invisible BOM character.
-                if (line.startsWith(""))
+                if (line.startsWith("\uFEFF"))
                     line = line.substring(1);
                 if (line.trim().isEmpty())
                     continue;
@@ -169,13 +171,47 @@ public final class CsvHandler {
     // deleteFromCSV). Rows are matched on the first column.
     // =====================================================================
 
-    /** Adds a new record at the end of a file. The header is kept as it is. */
+    private static final class CsvContents {
+        private final String[] header;
+        private final List<String[]> rows;
+
+        private CsvContents(String[] header, List<String[]> rows) {
+            this.header = header;
+            this.rows = rows;
+        }
+    }
+
+    private static CsvContents readContents(Path path) throws IOException {
+        List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+        String[] header = new String[0];
+        List<String[]> rows = new ArrayList<>();
+        boolean headerRead = false;
+
+        for (String line : lines) {
+            if (line.trim().isEmpty())
+                continue;
+            if (!headerRead) {
+                if (line.startsWith("\uFEFF"))
+                    line = line.substring(1);
+                header = parseLine(line);
+                headerRead = true;
+            } else {
+                rows.add(parseLine(line));
+            }
+        }
+        return new CsvContents(header, rows);
+    }
+
+    /**
+     * Adds a new record at the end of a file. The header is kept as it is.
+     * 
+     * @param empNo
+     */
     public static void appendToCSV(String filePath, String... data) throws IOException {
         Path path = Paths.get(filePath);
-        String[] header = readHeader(path);
-        List<String[]> rows = readAll(path);
-        rows.add(data);
-        writeAll(path, header, rows);
+        CsvContents contents = readContents(path);
+        contents.rows.add(data);
+        writeAll(path, contents.header, contents.rows);
     }
 
     /**
@@ -185,13 +221,12 @@ public final class CsvHandler {
     public static boolean updateCSV(String filePath, String empNo, String... data)
             throws IOException {
         Path path = Paths.get(filePath);
-        String[] header = readHeader(path);
-        List<String[]> rows = readAll(path);
-        int index = indexOfKey(rows, empNo);
+        CsvContents contents = readContents(path);
+        int index = indexOfKey(contents.rows, empNo);
         if (index < 0)
             return false;
-        rows.set(index, data);
-        writeAll(path, header, rows);
+        contents.rows.set(index, data);
+        writeAll(path, contents.header, contents.rows);
         return true;
     }
 
@@ -201,13 +236,12 @@ public final class CsvHandler {
      */
     public static boolean deleteFromCSV(String filePath, String empNo) throws IOException {
         Path path = Paths.get(filePath);
-        String[] header = readHeader(path);
-        List<String[]> rows = readAll(path);
-        int index = indexOfKey(rows, empNo);
+        CsvContents contents = readContents(path);
+        int index = indexOfKey(contents.rows, empNo);
         if (index < 0)
             return false;
-        rows.remove(index);
-        writeAll(path, header, rows);
+        contents.rows.remove(index);
+        writeAll(path, contents.header, contents.rows);
         return true;
     }
 
@@ -261,6 +295,27 @@ public final class CsvHandler {
     }
 
     /**
+     * Adds an employee model to employee.csv, converting it to the CSV data
+     * representation before saving.
+     */
+    public static void addEmployee(Employee employee) throws IOException {
+        if (employee == null) {
+            throw new IllegalArgumentException("Employee data is required.");
+        }
+        saveEmployee(toEmployeeData(employee));
+    }
+
+    private static EmployeeData toEmployeeData(Employee employee) {
+        return new EmployeeData(
+                employee.getEmpNo(), employee.getLastName(), employee.getFirstName(),
+                employee.getBirthday(), employee.getAddress(), employee.getPhone(),
+                employee.getSss(), employee.getPhilhealth(), employee.getTin(), employee.getPagibig(),
+                employee.getStatus(), employee.getPosition(), employee.getSupervisor(),
+                employee.getBasicSalary(), employee.getRiceSubsidy(),
+                employee.getPhoneAllowance(), employee.getClothingAllowance());
+    }
+
+    /**
      * Finds the supervisor of an employee. The file stores the supervisor as
      * "Last, First" text, so the match ignores case, commas and spaces. That
      * also handles the row written as "San, Jose Brad" for last name
@@ -305,6 +360,20 @@ public final class CsvHandler {
         return updateEmployee(EMPLOYEE_FILE, employee);
     }
 
+    /**
+     * Replaces the row for the given employee number using the employee model.
+     * Returns false if that employee number does not exist.
+     */
+    public static boolean updateEmployee(int empNo, Employee employee) throws IOException {
+        if (employee == null) {
+            throw new IllegalArgumentException("Employee data is required.");
+        }
+        if (empNo <= 0 || employee.getEmpNo() != empNo) {
+            throw new IllegalArgumentException("Employee number must match the employee data.");
+        }
+        return updateEmployee(toEmployeeData(employee));
+    }
+
     /** Replaces the row with the same empNo. Returns false if not found. */
     public static boolean updateEmployee(Path path, EmployeeData employee) throws IOException {
         List<String[]> rows = readAll(path);
@@ -318,6 +387,14 @@ public final class CsvHandler {
 
     public static boolean deleteEmployee(String empNo) throws IOException {
         return deleteEmployee(EMPLOYEE_FILE, empNo);
+    }
+
+    /** Removes the row with this employee number. Returns false if not found. */
+    public static boolean removeEmployee(int empNo) throws IOException {
+        if (empNo <= 0) {
+            throw new IllegalArgumentException("Employee number must be positive.");
+        }
+        return deleteEmployee(Integer.toString(empNo));
     }
 
     /** Removes the row with this empNo. Returns false if not found. */
@@ -414,6 +491,68 @@ public final class CsvHandler {
             }
         }
         return Optional.empty();
+    }
+
+    // =====================================================================
+    // leaves.csv and attendance.csv: read-only counts for the dashboard
+    // =====================================================================
+
+    /**
+     * Counts leave requests with the given status (for example "PENDING"),
+     * across all employees. The comparison ignores case.
+     */
+    public static int countLeaves(String status) throws IOException {
+        int count = 0;
+        // leaveID,employeeID,type,startDate,endDate,status,reason
+        for (String[] row : readAll(LEAVES_FILE)) {
+            if (row.length > 5 && row[5].equalsIgnoreCase(status))
+                count++;
+        }
+        return count;
+    }
+
+    /** Counts one employee's leave requests with the given status. */
+    public static int countLeaves(int empNo, String status) throws IOException {
+        int count = 0;
+        for (String[] row : readAll(LEAVES_FILE)) {
+            if (row.length > 5 && row[1].equals(String.valueOf(empNo))
+                    && row[5].equalsIgnoreCase(status))
+                count++;
+        }
+        return count;
+    }
+
+    /**
+     * Counts the days an employee has an attendance record in a month.
+     *
+     * @param yearMonth a "yyyy-MM" string, as returned by loadAvailableMonths
+     */
+    public static int countAttendanceDays(int empNo, String yearMonth) throws IOException {
+        int count = 0;
+        // empNo,date,logIn,logOut
+        for (String[] row : readAll(ATTENDANCE_FILE)) {
+            if (row.length > 1 && row[0].equals(String.valueOf(empNo))
+                    && row[1].startsWith(yearMonth))
+                count++;
+        }
+        return count;
+    }
+
+    /**
+     * Returns the newest "yyyy-MM" found in attendance.csv, or empty if the file
+     * has no rows.
+     */
+    public static Optional<String> latestAttendanceMonth() throws IOException {
+        List<String> months = loadAvailableMonths(ATTENDANCE_FILE.toString());
+        return months.isEmpty() ? Optional.empty() : Optional.of(months.get(months.size() - 1));
+    }
+
+    public static int getNextEmpNo() {
+        try {
+            return getLastEmployeeNumber(EMPLOYEE_FILE.toString()) + 1;
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to read employee numbers.", e);
+        }
     }
 
 }

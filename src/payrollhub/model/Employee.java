@@ -63,6 +63,14 @@ public abstract class Employee {
         return firstName + " " + lastName;
     }
 
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
     public double getBasicSalary() {
         return basicSalary;
     }
