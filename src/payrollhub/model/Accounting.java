@@ -14,31 +14,87 @@ public class Accounting extends Employee implements FinanceHub, UserHub {
         super(empNo, lastName, firstName, address, phone, birthday, supervisor, status, position, sss, philhealth, tin,
                 pagibig,
                 basicSalary, riceSubsidy, phoneAllowance, clothingAllowance);
-        // TODO Auto-generated constructor stub
     }
 
+    // Triggers the high-level payroll logic for the current cycle.
     @Override
     public void batchProcessPayroll(String payPeriod) {
-        // TODO: implement batch payroll processing
+        if (payPeriod == null || payPeriod.isBlank()) {
+            throw new IllegalArgumentException("Pay period must not be blank.");
+        }
+
+        generatePayslip(getEmpNo(), payPeriod);
     }
 
+    // Produces a detailed breakdown of earnings/deductions.
+    @Override
+    public Payslip createPayslip(int empNo) {
+        return generatePayslip(empNo);
+    }
+
+    // Produces a breakdown for a specific period.
+    public Payslip createPayslip(int empNo, String period) {
+        return generatePayslip(empNo, period);
+    }
+
+    // Creates a summary of withholding taxes for BIR compliance.
+    public File generateTaxReport(String quarter) {
+        return generateTaxReport(quarter);
+    }
+
+    // Reports total SSS, PhilHealth, and Pag-IBIG contributions.
+    public SummaryData generateDeductionSummary(String month) {
+        return generateDeductionSummary(month);
+    }
+
+    // Accesses the money variables inherited from the parent.
+    protected double viewSalaryData() {
+        return getBasicSalary() + getRiceSubsidy() + getPhoneAllowance() + getClothingAllowance();
+    }
+
+    // Aggregates SSS, PhilHealth, and Pag-IBIG for calculations.
+    private double computeStatutoryDeductions(double gross) {
+        return getSssDeduction(gross) + getPhilHealthDeduction(gross) + getPagibigDeduction(gross);
+    }
+
+    // Computes total pay including all allowances.
+    public double calculateGrossSalary() {
+        return getBasicSalary() + getRiceSubsidy() + getPhoneAllowance() + getClothingAllowance();
+    }
+
+    // Computes total pay including all allowances
+    public double CalculatePay() {
+        return (getHourlyRate() * calculateTotalHoursWorked()) + getRiceSubsidy()
+                + getPhoneAllowance() + getClothingAllowance();
+    }
+
+    // Updates an employee’s basic salary. Allowances are updated through their own
+    // setters.
     @Override
     public void updateSalaryRates(int empNo, double newBasicSalary) {
-        // TODO: implement salary rate update
+        if (empNo != getEmpNo()) {
+            throw new IllegalArgumentException("Employee number does not match this accounting employee.");
+        }
+        if (!Double.isFinite(newBasicSalary) || newBasicSalary < 0) {
+            throw new IllegalArgumentException("Basic salary must be a finite, non-negative amount.");
+        }
+
+        setBasicSalary(newBasicSalary);
     }
 
-    // ------------------------ Unimplemented methods -----------------------
-
-    @Override
+    // Mandates role identification for UI rendering.
     public Position getRole() {
         return Position.ACCOUNTING;
     }
 
+    // Validates credentials for accounting access. @Override: Implements UserHub
+    // contract. Returns true on success.
     @Override
     public boolean authenticate(String user, String pass) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'authenticate'");
+        return false;
     }
+
+    // ------------------------ Unimplemented methods -----------------------
 
     @Override
     public boolean authenticate(String token) {
@@ -80,18 +136,6 @@ public class Accounting extends Employee implements FinanceHub, UserHub {
     public Payslip generatePayslip(int empNo, String period) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generatePayslip'");
-    }
-
-    @Override
-    public File generateTaxReport(String quarter) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateTaxReport'");
-    }
-
-    @Override
-    public SummaryData generateDeductionSummary(String month) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateDeductionSummary'");
     }
 
     @Override

@@ -1,5 +1,7 @@
 package payrollhub.service;
 
+import java.util.Locale;
+
 import payrollhub.model.Employee;
 
 public class PayrollCalculator {
@@ -69,23 +71,92 @@ public class PayrollCalculator {
         return gross * 0.02;
     }
 
-    // Computes withholding tax based on BIR/TRAIN law brackets.
+    // Computes withholding tax based on BIR/TRAIN law brackets after applying
+    // deduction
     public double finalWithholdingTax(double gross) {
-
+        if (gross <= 20832.00) {
+            return 0.00;
+        }
+        // Bracket 2: Over P20,832 to P33,333 -> 15% in excess of P20,832
+        else if (gross <= 33333.00) {
+            return (gross - 20832.00) * 0.15;
+        }
+        // Bracket 3: Over P33,333 to P66,667 -> P1,875 + 20% in excess of P33,333
+        else if (gross <= 66667.00) {
+            return 1875.00 + ((gross - 33333.00) * 0.20);
+        }
+        // Bracket 4: Over P66,667 to P166,667 -> P8,541.80 + 25% in excess of P66,667
+        else if (gross <= 166667.00) {
+            return 8541.80 + ((gross - 66667.00) * 0.25);
+        }
+        // Bracket 5: Over P166,667 to P666,667 -> P33,541.80 + 30% in excess of
+        // P166,667
+        else if (gross <= 666670.00) {
+            return 33541.80 + ((gross - 166667.00) * 0.30);
+        }
+        // Bracket 6: Over P666,667 -> P183,541.80 + 35% in excess of P666,667
+        else {
+            return 183541.80 + ((gross - 666670.00) * 0.35);
+        }
     }
 
     // The Firewall logic: Subtracts all deductions from the gross salary.
     public double payAfterDeductions(double gross, double deduct) {
-
+        if (gross < 0) {
+            throw new IllegalArgumentException("Gross salary cannot be negative.");
+        }
+        if (deduct < 0) {
+            throw new IllegalArgumentException("Deductions cannot be negative.");
+        }
+        return gross - deduct;
     }
 
     // Full Summary: Aggregates all government deductions.
     public double sumDeductions(Employee empNo) {
-
+        if (empNo == null) {
+            throw new IllegalArgumentException("Employee data is required.");
+        }
+        double gross = finalGross(empNo);
+        return finalSSS(gross)
+                + finalPhilHealth(gross)
+                + finalPagIbig(gross)
+                + finalWithholdingTax(gross);
     }
 
     // Specific Summary: Targets one specific deduction type.
     public double sumDeductions(Employee empNo, String type) {
+        if (empNo == null) {
+            throw new IllegalArgumentException("Employee data is required.");
+        }
+        if (type == null || type.trim().isEmpty()) {
+            throw new IllegalArgumentException("Deduction type is required.");
+        }
 
+        double gross = finalGross(empNo);
+        String normalized = type.trim().toLowerCase(Locale.ROOT)
+                .replace("_", "")
+                .replace("-", "")
+                .replace(" ", "");
+
+        switch (normalized) {
+            case "sss":
+                return finalSSS(gross);
+            case "philhealth":
+                return finalPhilHealth(gross);
+            case "pagibig":
+                return finalPagIbig(gross);
+            case "withholdingtax":
+            case "tax":
+            case "withholding":
+                return finalWithholdingTax(gross);
+            case "total":
+            case "all":
+            case "statutory":
+            case "deduction":
+            case "deductions":
+                return sumDeductions(empNo);
+            default:
+                throw new IllegalArgumentException("Unsupported deduction type: " + type);
+        }
     }
 }

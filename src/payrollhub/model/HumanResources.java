@@ -6,8 +6,6 @@ import java.util.List;
 
 import payrollhub.contracts.HRHub;
 import payrollhub.contracts.LeaveHub;
-import payrollhub.model.Position;
-import payrollhub.model.LeaveRequest;
 
 public class HumanResources extends Employee implements HRHub, LeaveHub {
 

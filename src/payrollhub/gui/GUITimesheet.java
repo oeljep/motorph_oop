@@ -119,7 +119,7 @@ public class GUITimesheet extends JFrame {
             throw new IllegalArgumentException("A signed-in user is required.");
         }
         loggedIn = emp;
-        employeeManagementButton.setVisible(emp.canManageEmployees());
+        employeeManagementButton.setVisible(NavAccess.canOpen(emp.getRole(), NavTab.EMPLOYEES));
         employeeLabel.setText(emp.getEmployee()
                 .map(employee -> employee.getFullName() + " (#" + emp.getEmpNo() + ")")
                 .orElse(emp.getUsername() + " (#" + emp.getEmpNo() + ")"));
