@@ -13,9 +13,6 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.Toolkit;
-import java.awt.image.FilteredImageSource;
-import java.awt.image.RGBImageFilter;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
@@ -61,10 +58,8 @@ public class GUILogin extends JFrame {
     private static final double FIELD_RADIUS = 20;
 
     private final UserService userService = new UserService();
-    private final JTextField usernameField = GUIUtility.createRoundedTextField("Username", s(FIELD_RADIUS * 2),
-            s(11.8) + 2f);
-    private final JPasswordField passwordField = GUIUtility.createRoundedPasswordField("Password", s(FIELD_RADIUS * 2),
-            s(11.8) + 2f);
+    private final JTextField usernameField = GUIUtility.createRoundedTextField("Username", s(FIELD_RADIUS * 2), s(11.8) + 2f);
+    private final JPasswordField passwordField = GUIUtility.createRoundedPasswordField("Password", s(FIELD_RADIUS * 2), s(11.8) + 2f);
 
     /**
      * Initializes the login window and builds its content.
@@ -253,12 +248,13 @@ public class GUILogin extends JFrame {
     }
 
     /**
-     * Opens the shared dashboard for the authenticated user. The dashboard
-     * determines which tabs are available based on the user's role.
+     * Opens the dashboard for users who can manage employees or the timesheet
+     * for regular employees; unsupported roles receive an error dialog.
      *
-     * @param user the authenticated user whose role determines tab access
+     * @param user the authenticated user whose role determines the destination
      */
     private void openDashboardForRole(GUIUser user) {
+        // GUIDashboard builds the sidebar from the role, so every role uses it.
         new GUIDashboard(user).setVisible(true);
         dispose();
     }
@@ -315,27 +311,7 @@ public class GUILogin extends JFrame {
 
         private static Image loadLogo() {
             URL url = GUILogin.class.getResource(LOGO_RESOURCE);
-            if (url == null) {
-                return null;
-            }
-
-            Image source = new ImageIcon(url).getImage();
-            RGBImageFilter removeBlackBackground = new RGBImageFilter() {
-                {
-                    canFilterIndexColorModel = true;
-                }
-
-                @Override
-                public int filterRGB(int x, int y, int rgb) {
-                    int red = (rgb >> 16) & 0xff;
-                    int green = (rgb >> 8) & 0xff;
-                    int blue = rgb & 0xff;
-                    return red < 40 && green < 40 && blue < 40 ? rgb & 0x00ffffff : rgb;
-                }
-            };
-            Image transparent = Toolkit.getDefaultToolkit().createImage(
-                    new FilteredImageSource(source.getSource(), removeBlackBackground));
-            return new ImageIcon(transparent).getImage();
+            return url == null ? null : new ImageIcon(url).getImage();
         }
 
         @Override
@@ -376,7 +352,7 @@ public class GUILogin extends JFrame {
             inner.dispose();
         }
 
-        /** Logo tilted by -4.1 degrees with a drop shadow. */
+        /** Logo tilted by -4.1 degrees (Figma 369:1620). */
         private void paintLogo(Graphics2D g2) {
             double width = s(572.3);
             double height = s(381.5);
@@ -390,6 +366,7 @@ public class GUILogin extends JFrame {
 
             Shape box = new RoundRectangle2D.Double(x, y, width, height, 6, 6);
             if (logo == null) {
+                // TODO: export the Motor PH logo from Figma to src/images/motorph-logo.png.
                 t.setColor(new Color(0xE9E4E6));
                 t.fill(box);
                 t.setColor(GUIUtility.BRAND_RED);

@@ -7,8 +7,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.TreeSet;
 
@@ -36,6 +44,18 @@ public final class CsvHandler {
     public static final Path ATTENDANCE_FILE = DATA_DIR.resolve("attendance.csv");
     public static final Path USERS_FILE = DATA_DIR.resolve("users.csv");
     public static final Path LEAVES_FILE = DATA_DIR.resolve("leaves.csv");
+    public static final Path TICKETS_FILE = DATA_DIR.resolve("tickets.csv");
+
+    private static final String[] USER_HEADER = { "empNo", "userName", "password", "role" };
+    private static final String[] LEAVE_HEADER = {
+            "leaveID", "employeeID", "type", "startDate", "endDate", "status", "reason"
+    };
+    private static final String[] TICKET_HEADER = {
+            "ticketID", "employeeID", "subject", "message", "createdDate",
+            "processedBy", "status", "remarks"
+    };
+    private static final DateTimeFormatter ATTENDANCE_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("H:mm");
 
     public static final String[] EMPLOYEE_HEADER = {
             "empNo", "lastName", "firstName", "birthday", "address", "phone",
@@ -467,6 +487,95 @@ public final class CsvHandler {
         return new ArrayList<>(months);
     }
 
+    /** Returns the months with attendance for one employee, in ascending order. */
+    public static List<String> loadAttendanceMonths(int empNo) throws IOException {
+        if (empNo <= 0) {
+            throw new IllegalArgumentException("Employee number must be positive.");
+        }
+        TreeSet<String> months = new TreeSet<>();
+        List<String[]> rows = readAll(ATTENDANCE_FILE);
+        for (int i = 0; i < rows.size(); i++) {
+            String[] row = rows.get(i);
+            if (row.length != 4) {
+                throw new IOException("Malformed attendance record at data row " + (i + 1) + ".");
+            }
+            if (row[0].equals(Integer.toString(empNo))) {
+                try {
+                    months.add(YearMonth.from(LocalDate.parse(row[1])).toString());
+                } catch (DateTimeParseException e) {
+                    throw new IOException("Invalid attendance date at data row " + (i + 1) + ".", e);
+                }
+            }
+        }
+        return new ArrayList<>(months);
+    }
+
+    /** Loads one employee's attendance records for a yyyy-MM pay period. */
+    public static List<AttendanceData> loadAttendance(int empNo, String period) throws IOException {
+        if (empNo <= 0 || period == null || period.isBlank()) {
+            throw new IllegalArgumentException("Employee number and attendance month are required.");
+        }
+        YearMonth month;
+        try {
+            month = YearMonth.parse(period);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Attendance month must use yyyy-MM format.", e);
+        }
+
+        List<AttendanceData> records = new ArrayList<>();
+        List<String[]> rows = readAll(ATTENDANCE_FILE);
+        for (int i = 0; i < rows.size(); i++) {
+            String[] row = rows.get(i);
+            if (row.length != 4) {
+                throw new IOException("Malformed attendance record at data row " + (i + 1) + ".");
+            }
+            if (!row[0].equals(Integer.toString(empNo))) {
+                continue;
+            }
+            try {
+                LocalDate date = LocalDate.parse(row[1]);
+                if (!YearMonth.from(date).equals(month)) {
+                    continue;
+                }
+                LocalTime logIn = row[2].isBlank() ? null : LocalTime.parse(row[2], ATTENDANCE_TIME_FORMAT);
+                LocalTime logOut = row[3].isBlank() ? null : LocalTime.parse(row[3], ATTENDANCE_TIME_FORMAT);
+                records.add(new AttendanceData(empNo, date, logIn, logOut));
+            } catch (DateTimeParseException | IllegalArgumentException e) {
+                throw new IOException("Invalid attendance record at data row " + (i + 1) + ".", e);
+            }
+        }
+        records.sort(Comparator.comparing(AttendanceData::getDate));
+        return records;
+    }
+
+    public static Optional<AttendanceData> findAttendance(int empNo, LocalDate date) throws IOException {
+        if (date == null) {
+            throw new IllegalArgumentException("Attendance date is required.");
+        }
+        for (AttendanceData record : loadAttendance(empNo, YearMonth.from(date).toString())) {
+            if (record.getDate().equals(date)) {
+                return Optional.of(record);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static void clockIn(int empNo, LocalDate date, LocalTime time) throws IOException {
+        if (date == null || time == null) {
+            throw new IllegalArgumentException("Check-in date and time are required.");
+        }
+        new payrollhub.service.AttendanceService(ATTENDANCE_FILE.toString())
+                .recordTimeIn(empNo, LocalDateTime.of(date, time));
+    }
+
+    public static void clockOut(int empNo, LocalDate date, LocalTime time) throws IOException {
+        if (date == null || time == null) {
+            throw new IllegalArgumentException("Check-out date and time are required.");
+        }
+        new payrollhub.service.AttendanceService(ATTENDANCE_FILE.toString())
+                .recordTimeOut(empNo, LocalDateTime.of(date, time));
+    }
+
     // =====================================================================
     // users.csv
     // =====================================================================
@@ -491,6 +600,192 @@ public final class CsvHandler {
             }
         }
         return Optional.empty();
+    }
+
+    public static Optional<String[]> findUser(String username) throws IOException {
+        if (username == null || username.isBlank()) {
+            return Optional.empty();
+        }
+        for (String[] row : readAll(USERS_FILE)) {
+            if (row.length >= 4 && row[1].equalsIgnoreCase(username.trim())) {
+                return Optional.of(row);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static void saveUser(int empNo, String username, String password, String role)
+            throws IOException {
+        if (empNo <= 0 || username == null || username.isBlank()
+                || password == null || password.isBlank() || role == null || role.isBlank()) {
+            throw new IllegalArgumentException("Employee number, username, password and role are required.");
+        }
+        List<String[]> rows = Files.exists(USERS_FILE) ? readAll(USERS_FILE) : new ArrayList<>();
+        for (String[] row : rows) {
+            if (row.length >= 2 && (row[0].equals(Integer.toString(empNo))
+                    || row[1].equalsIgnoreCase(username.trim()))) {
+                throw new IllegalArgumentException("Employee number or username is already in use.");
+            }
+        }
+        rows.add(new String[] { Integer.toString(empNo), username.trim(), password, role.trim() });
+        writeAll(USERS_FILE, existingHeader(USERS_FILE, USER_HEADER), rows);
+    }
+
+    public static boolean deleteUser(int empNo) throws IOException {
+        if (empNo <= 0) {
+            throw new IllegalArgumentException("Employee number must be positive.");
+        }
+        return deleteFromCSV(USERS_FILE.toString(), Integer.toString(empNo));
+    }
+
+    public static void updatePassword(int empNo, String newPassword) throws IOException {
+        if (empNo <= 0 || newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("Employee number and new password are required.");
+        }
+        List<String[]> rows = readAll(USERS_FILE);
+        for (String[] row : rows) {
+            if (row.length >= 4 && row[0].equals(Integer.toString(empNo))) {
+                row[2] = newPassword;
+                writeAll(USERS_FILE, existingHeader(USERS_FILE, USER_HEADER), rows);
+                return;
+            }
+        }
+        throw new IOException("No login record found for employee " + empNo + ".");
+    }
+
+    private static String[] existingHeader(Path path, String[] fallback) throws IOException {
+        if (Files.exists(path) && Files.size(path) > 0) {
+            String[] header = readHeader(path);
+            if (header.length > 0) {
+                return header;
+            }
+        }
+        return fallback;
+    }
+
+    public static List<LeaveData> loadLeaves() throws IOException {
+        if (!Files.exists(LEAVES_FILE)) {
+            return new ArrayList<>();
+        }
+        List<String[]> rows = readAll(LEAVES_FILE);
+        List<LeaveData> leaves = new ArrayList<>();
+        for (int i = 0; i < rows.size(); i++) {
+            try {
+                leaves.add(LeaveData.fromCsvRow(rows.get(i)));
+            } catch (RuntimeException e) {
+                throw new IOException("Malformed leave record at data row " + (i + 1) + ".", e);
+            }
+        }
+        return leaves;
+    }
+
+    public static String nextLeaveId() throws IOException {
+        int next = 1;
+        for (LeaveData leave : loadLeaves()) {
+            next = Math.max(next, numericIdSuffix(leave.getLeaveId(), "L") + 1);
+        }
+        return String.format(Locale.ROOT, "L%04d", next);
+    }
+
+    public static void saveLeave(LeaveData leave) throws IOException {
+        if (leave == null) {
+            throw new IllegalArgumentException("Leave request is required.");
+        }
+        List<String[]> rows = Files.exists(LEAVES_FILE) ? readAll(LEAVES_FILE) : new ArrayList<>();
+        for (String[] row : rows) {
+            if (row.length > 0 && row[0].equals(leave.getLeaveId())) {
+                throw new IllegalArgumentException("Leave request ID already exists.");
+            }
+        }
+        rows.add(leave.toCsvRow());
+        writeAll(LEAVES_FILE, existingHeader(LEAVES_FILE, LEAVE_HEADER), rows);
+    }
+
+    public static void updateLeaveStatus(String leaveId, String status) throws IOException {
+        if (leaveId == null || leaveId.isBlank() || status == null
+                || !List.of(LeaveData.PENDING, LeaveData.APPROVED, LeaveData.REJECTED).contains(status)) {
+            throw new IllegalArgumentException("Leave status update is invalid.");
+        }
+        List<String[]> rows = readAll(LEAVES_FILE);
+        for (String[] row : rows) {
+            if (row.length != LEAVE_HEADER.length) {
+                throw new IOException("Malformed leave record while updating status.");
+            }
+            if (row[0].equals(leaveId)) {
+                row[5] = status;
+                writeAll(LEAVES_FILE, existingHeader(LEAVES_FILE, LEAVE_HEADER), rows);
+                return;
+            }
+        }
+        throw new IOException("Leave request " + leaveId + " was not found.");
+    }
+
+    public static List<TicketData> loadTickets() throws IOException {
+        if (!Files.exists(TICKETS_FILE)) {
+            return new ArrayList<>();
+        }
+        List<String[]> rows = readAll(TICKETS_FILE);
+        List<TicketData> tickets = new ArrayList<>();
+        for (int i = 0; i < rows.size(); i++) {
+            try {
+                tickets.add(TicketData.fromCsvRow(rows.get(i)));
+            } catch (RuntimeException e) {
+                throw new IOException("Malformed ticket record at data row " + (i + 1) + ".", e);
+            }
+        }
+        return tickets;
+    }
+
+    public static String nextTicketId() throws IOException {
+        int next = 1;
+        for (TicketData ticket : loadTickets()) {
+            next = Math.max(next, numericIdSuffix(ticket.getTicketId(), "T") + 1);
+        }
+        return String.format(Locale.ROOT, "T%04d", next);
+    }
+
+    public static void saveTicket(TicketData ticket) throws IOException {
+        if (ticket == null) {
+            throw new IllegalArgumentException("Ticket is required.");
+        }
+        List<String[]> rows = Files.exists(TICKETS_FILE) ? readAll(TICKETS_FILE) : new ArrayList<>();
+        for (String[] row : rows) {
+            if (row.length > 0 && row[0].equals(ticket.getTicketId())) {
+                throw new IllegalArgumentException("Ticket ID already exists.");
+            }
+        }
+        rows.add(ticket.toCsvRow());
+        writeAll(TICKETS_FILE, existingHeader(TICKETS_FILE, TICKET_HEADER), rows);
+    }
+
+    public static void updateTicket(TicketData ticket) throws IOException {
+        if (ticket == null) {
+            throw new IllegalArgumentException("Ticket is required.");
+        }
+        List<String[]> rows = readAll(TICKETS_FILE);
+        for (int i = 0; i < rows.size(); i++) {
+            String[] row = rows.get(i);
+            if (row.length != TICKET_HEADER.length) {
+                throw new IOException("Malformed ticket record at data row " + (i + 1) + ".");
+            }
+            if (row[0].equals(ticket.getTicketId())) {
+                rows.set(i, ticket.toCsvRow());
+                writeAll(TICKETS_FILE, existingHeader(TICKETS_FILE, TICKET_HEADER), rows);
+                return;
+            }
+        }
+        throw new IOException("Ticket " + ticket.getTicketId() + " was not found.");
+    }
+
+    private static int numericIdSuffix(String value, String prefix) throws IOException {
+        if (value == null || !value.startsWith(prefix) || value.length() == prefix.length()) {
+            throw new IOException("Invalid record ID: " + value);
+        }
+        try {
+            return Integer.parseInt(value.substring(prefix.length()));
+        } catch (NumberFormatException e) {
+            throw new IOException("Invalid record ID: " + value, e);
+        }
     }
 
     // =====================================================================

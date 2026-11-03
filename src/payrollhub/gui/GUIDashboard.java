@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 import javax.swing.JFrame;
@@ -28,10 +27,13 @@ import payrollhub.data.EmployeeData;
  */
 public class GUIDashboard extends JFrame {
 
+    private static final String PROFILE_CARD = "PROFILE";
+
     private final GUIUser user;
     private final CardLayout cards = new CardLayout();
     private final JPanel content = new JPanel(cards);
     private final GUISidebar sidebar;
+    private final java.util.Map<String, JPanel> screens = new java.util.HashMap<>();
 
     /**
      * Opens the dashboard for a signed-in user.
@@ -43,14 +45,10 @@ public class GUIDashboard extends JFrame {
         this.user = user;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        List<NavTab> tabs = NavAccess.tabsFor(user.getRole());
-        for (NavTab tab : tabs) {
-            content.add(createScreen(tab), tab.name());
-        }
         content.setBackground(GUIUtility.PAGE_BACKGROUND);
 
-        sidebar = new GUISidebar(user.getRole(), tab -> cards.show(content, tab.name()));
-        GUIHeader header = new GUIHeader(firstNameOf(user), this::logout);
+        sidebar = new GUISidebar(user.getRole(), this::showTab);
+        GUIHeader header = new GUIHeader(firstNameOf(user), this::logout, this::showProfile);
 
         JPanel root = new JPanel(new BorderLayout());
         root.add(header, BorderLayout.NORTH);
@@ -71,23 +69,46 @@ public class GUIDashboard extends JFrame {
      * @return the panel to show when that tab is selected
      */
     private JPanel createScreen(NavTab tab) {
-        if (!NavAccess.canOpen(user.getRole(), tab)) {
-            throw new IllegalArgumentException("Role cannot open tab: " + tab);
-        }
-
         switch (tab) {
             case DASHBOARD:
                 return new GUIDashboardHome(user.getRole(), user.getEmpNo());
-            // TODO: replace each placeholder with its real screen as it is built.
             case TIME_TRACKER:
+                return new GUITimesheet(user.getEmpNo());
             case SCHEDULE:
+                return new GUILeave(user.getRole(), user.getEmpNo());
             case PAYSLIP:
+                return new GUIPayslip(user.getEmpNo());
             case EMPLOYEES:
+                return new GUIEmployees(user.getRole(), user.getEmpNo());
             case PAYROLL_MANAGER:
+                return new GUIPayrollManager();
             case TICKET_MANAGER:
+                return new GUITicketManager(user.getEmpNo());
             default:
                 return createPlaceholder(tab);
         }
+
+    }
+
+    /**
+     * Opens a tab after re-checking the role, and rebuilds its screen so the
+     * data is fresh each time.
+     */
+    private void showTab(NavTab tab) {
+        if (!NavAccess.tabsFor(user.getRole()).contains(tab)) {
+            return;
+        }
+        showCard(tab.name(), createScreen(tab));
+    }
+
+    private void showCard(String name, JPanel screen) {
+        JPanel old = screens.put(name, screen);
+        if (old != null) {
+            content.remove(old);
+        }
+        content.add(screen, name);
+        content.revalidate();
+        cards.show(content, name);
     }
 
     private JPanel createPlaceholder(NavTab tab) {
@@ -111,6 +132,12 @@ public class GUIDashboard extends JFrame {
             System.err.println("Could not read employee record: " + e.getMessage());
         }
         return user.getRole();
+    }
+
+    /** Shows the signed-in user's profile and clears the sidebar highlight. */
+    private void showProfile() {
+        sidebar.clearSelection();
+        showCard(PROFILE_CARD, new GUIViewProfile(user.getEmpNo()));
     }
 
     /** Returns to the sign-in screen and closes this window. */

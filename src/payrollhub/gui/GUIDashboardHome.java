@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,16 +29,7 @@ import payrollhub.data.CsvHandler;
 import payrollhub.data.EmployeeData;
 
 /**
- * Landing tab of the dashboard. It shows only figures that already exist in
- * the CSV files, so every number on screen is real:
- *
- * - Management roles see company totals (headcount, basic payroll, average
- * salary, pending leave requests) and the employee list.
- * - Regular staff see their own position, pay and allowances, attendance days
- * in the latest month on file, and their pending leave requests.
- *
- * All reading goes through {@link CsvHandler}. Which view appears is decided
- * by {@link NavAccess#isManagement(String)}.
+ * Role-specific dashboard overview shown inside the dashboard shell.
  */
 public class GUIDashboardHome extends JPanel {
 
@@ -46,12 +38,6 @@ public class GUIDashboardHome extends JPanel {
     private final String role;
     private final int empNo;
 
-    /**
-     * Builds the dashboard for one user.
-     *
-     * @param role  the user's role from users.csv
-     * @param empNo the user's employee number
-     */
     public GUIDashboardHome(String role, int empNo) {
         this.role = role;
         this.empNo = empNo;
@@ -67,12 +53,10 @@ public class GUIDashboardHome extends JPanel {
             }
         } catch (IOException | RuntimeException e) {
             removeAll();
-            add(title("Dashboard"), BorderLayout.NORTH);
+            add(GUIUtility.createPageTitle("Dashboard"), BorderLayout.NORTH);
             add(new JLabel("Could not load dashboard data: " + e.getMessage()), BorderLayout.CENTER);
         }
     }
-
-    // ---------------------- Management view ----------------------
 
     private void buildManagementView() throws IOException {
         List<EmployeeData> employees = CsvHandler.loadEmployees();
@@ -80,11 +64,11 @@ public class GUIDashboardHome extends JPanel {
         double payroll = 0;
         int regular = 0;
         int probationary = 0;
-        for (EmployeeData e : employees) {
-            payroll += e.getBasicSalary();
-            if (e.getStatus().equalsIgnoreCase("Regular")) {
+        for (EmployeeData employee : employees) {
+            payroll += employee.getBasicSalary();
+            if (employee.getStatus().equalsIgnoreCase("Regular")) {
                 regular++;
-            } else if (e.getStatus().equalsIgnoreCase("Probationary")) {
+            } else if (employee.getStatus().equalsIgnoreCase("Probationary")) {
                 probationary++;
             }
         }
@@ -116,9 +100,10 @@ public class GUIDashboardHome extends JPanel {
                 return false;
             }
         };
-        for (EmployeeData e : employees) {
+        for (EmployeeData employee : employees) {
             model.addRow(new Object[] {
-                    e.getEmpNo(), e.getFullName(), e.getPosition(), e.getStatus(), peso(e.getBasicSalary())
+                    employee.getEmpNo(), employee.getFullName(), employee.getPosition(),
+                    employee.getStatus(), peso(employee.getBasicSalary())
             });
         }
 
@@ -136,7 +121,6 @@ public class GUIDashboardHome extends JPanel {
         header.setBackground(Color.WHITE);
         header.setReorderingAllowed(false);
 
-        // Right-align the salary column.
         javax.swing.table.DefaultTableCellRenderer right = new javax.swing.table.DefaultTableCellRenderer();
         right.setHorizontalAlignment(SwingConstants.RIGHT);
         table.getColumnModel().getColumn(4).setCellRenderer(right);
@@ -147,51 +131,57 @@ public class GUIDashboardHome extends JPanel {
 
         JPanel wrap = new JPanel(new BorderLayout(0, GUIUtility.scale(10)));
         wrap.setOpaque(false);
-        wrap.add(GUIUtility.createHeaderLabel("Employee List"), BorderLayout.NORTH);
+        wrap.add(sectionTitle("Employee List"), BorderLayout.NORTH);
         wrap.add(scroll, BorderLayout.CENTER);
         return wrap;
     }
 
-    // ---------------------- Personal view ----------------------
-
     private void buildPersonalView() throws IOException {
         Optional<EmployeeData> found = CsvHandler.findEmployee(empNo);
         if (found.isEmpty()) {
-            add(title("My Overview"), BorderLayout.NORTH);
+            add(GUIUtility.createPageTitle("My Overview"), BorderLayout.NORTH);
             add(new JLabel("No employee record found for employee number " + empNo + "."), BorderLayout.CENTER);
             return;
         }
-        EmployeeData me = found.get();
-        double allowances = me.getRiceSubsidy() + me.getPhoneAllowance() + me.getClothingAllowance();
+        EmployeeData employee = found.get();
+        double allowances = employee.getRiceSubsidy()
+                + employee.getPhoneAllowance() + employee.getClothingAllowance();
 
-        String month = CsvHandler.latestAttendanceMonth().orElse("");
+        List<String> attendanceMonths = CsvHandler.loadAttendanceMonths(empNo);
+        String month = attendanceMonths.isEmpty()
+                ? "" : attendanceMonths.get(attendanceMonths.size() - 1);
         int days = month.isEmpty() ? 0 : CsvHandler.countAttendanceDays(empNo, month);
         String attendanceNote = month.isEmpty() ? "No attendance on file" : "Days logged in " + month;
         int pending = CsvHandler.countLeaves(empNo, "PENDING");
 
         JPanel cards = new JPanel(new GridLayout(2, 3, GUIUtility.scale(20), GUIUtility.scale(20)));
         cards.setOpaque(false);
-        String reportsTo = me.getSupervisor().isEmpty() ? "Top of the organization"
-                : "Reports to " + me.getSupervisor();
-        cards.add(new StatCard("Position", me.getPosition(), reportsTo, true));
-        cards.add(new StatCard("Employment status", me.getStatus(), "Employee #" + me.getEmpNo(), true));
-        cards.add(new StatCard("Basic salary", peso(me.getBasicSalary()), "Per month"));
+        String reportsTo = employee.getSupervisor().isEmpty() ? "Top of the organization"
+                : "Reports to " + employee.getSupervisor();
+        cards.add(new StatCard("Position", employee.getPosition(), reportsTo, true));
+        cards.add(new StatCard("Employment status", employee.getStatus(),
+                "Employee #" + employee.getEmpNo(), true));
+        cards.add(new StatCard("Basic salary", peso(employee.getBasicSalary()), "Per month"));
         cards.add(new StatCard("Allowances", peso(allowances), "Rice, phone and clothing, per month"));
         cards.add(new StatCard("Attendance", String.valueOf(days), attendanceNote));
         cards.add(new StatCard("Pending leave requests", String.valueOf(pending), "Waiting for a decision"));
 
         JPanel top = new JPanel(new BorderLayout(0, GUIUtility.scale(20)));
         top.setOpaque(false);
-        top.add(title("Hi " + me.getFirstName() + ", here is your overview"), BorderLayout.NORTH);
+        top.add(title("Hi " + employee.getFirstName() + ", here is your overview"), BorderLayout.NORTH);
         top.add(cards, BorderLayout.CENTER);
         add(top, BorderLayout.NORTH);
     }
 
-    // ---------------------- Helpers ----------------------
-
     private static JLabel title(String text) {
-        JLabel label = new JLabel(text);
+        JLabel label = GUIUtility.createPageTitle(text);
         label.setFont(GUIUtility.bodyFont(Font.BOLD, GUIUtility.scale(30)));
+        return label;
+    }
+
+    private static JLabel sectionTitle(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(GUIUtility.bodyFont(Font.BOLD, 18f));
         label.setForeground(GUIUtility.FIELD_TEXT);
         return label;
     }
@@ -200,24 +190,16 @@ public class GUIDashboardHome extends JPanel {
         return "₱" + PESO.format(Math.round(amount));
     }
 
-    /** The role this dashboard was built for (useful for tests and debugging). */
     public String getRole() {
         return role;
     }
 
-    // ---------------------- Stat card ----------------------
-
-    /** A white rounded card with a caption, a large value and a small note. */
     private static final class StatCard extends JPanel {
 
         StatCard(String caption, String value, String note) {
             this(caption, value, note, false);
         }
 
-        /**
-         * @param textValue true when the value is a word or phrase rather than
-         *                  a number, so it is drawn smaller
-         */
         StatCard(String caption, String value, String note, boolean textValue) {
             setOpaque(false);
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -237,17 +219,17 @@ public class GUIDashboardHome extends JPanel {
             noteLabel.setForeground(GUIUtility.MUTED_TEXT);
 
             add(captionLabel);
-            add(javax.swing.Box.createVerticalStrut(GUIUtility.scale(10)));
+            add(Box.createVerticalStrut(GUIUtility.scale(10)));
             add(valueLabel);
-            add(javax.swing.Box.createVerticalStrut(GUIUtility.scale(8)));
+            add(Box.createVerticalStrut(GUIUtility.scale(8)));
             add(noteLabel);
-            add(javax.swing.Box.createVerticalGlue());
+            add(Box.createVerticalGlue());
         }
 
         @Override
         public Dimension getPreferredSize() {
-            Dimension d = super.getPreferredSize();
-            return new Dimension(d.width, Math.max(d.height, GUIUtility.scale(150)));
+            Dimension preferred = super.getPreferredSize();
+            return new Dimension(preferred.width, Math.max(preferred.height, GUIUtility.scale(150)));
         }
 
         @Override

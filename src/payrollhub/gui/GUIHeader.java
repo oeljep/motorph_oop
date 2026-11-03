@@ -40,19 +40,30 @@ public class GUIHeader extends JPanel {
     private final Avatar avatar = new Avatar();
 
     /**
-     * Creates the header.
+     * Creates the header with a clickable profile area.
      *
-     * @param displayName the name shown in "Hi, ..." and used for the avatar initials
+     * @param displayName the name shown in "Hi, ..." and used for the avatar
+     *                    initials
      * @param onLogout    runs when the user clicks "Log out"
+     * @param onProfile   runs when the user clicks the avatar or the greeting
      */
-    public GUIHeader(String displayName, Runnable onLogout) {
+    public GUIHeader(String displayName, Runnable onLogout, Runnable onProfile) {
         setLayout(new BorderLayout());
         setBackground(GUIUtility.BRAND_RED);
         setPreferredSize(new Dimension(0, HEADER_HEIGHT));
         setBorder(BorderFactory.createEmptyBorder(0, GUIUtility.scale(30), 0, GUIUtility.scale(22)));
 
         add(createBrand(), BorderLayout.WEST);
-        add(createProfile(onLogout), BorderLayout.EAST);
+        add(createProfile(onLogout, onProfile), BorderLayout.EAST);
+        setDisplayName(displayName);
+    }
+
+    /**
+     * Updates the greeting and avatar initials.
+     *
+     * @param displayName the name to show; blank falls back to "there"
+     */
+    public final void setDisplayName(String displayName) {
         String name = displayName == null ? "" : displayName.trim();
         greeting.setText("Hi, " + (name.isEmpty() ? "there" : name));
         avatar.setInitials(initialsOf(name));
@@ -74,7 +85,9 @@ public class GUIHeader extends JPanel {
         return brand;
     }
 
-    private JPanel createProfile(Runnable onLogout) {
+    private JPanel createProfile(Runnable onLogout, Runnable onProfile) {
+        makeClickable(avatar, onProfile);
+        makeClickable(greeting, onProfile);
         greeting.setForeground(Color.WHITE);
         greeting.setFont(GUIUtility.bodyFont(Font.BOLD, GUIUtility.scale(26)));
         greeting.setAlignmentX(Component.RIGHT_ALIGNMENT);
@@ -99,6 +112,20 @@ public class GUIHeader extends JPanel {
         profile.add(Box.createHorizontalStrut(GUIUtility.scale(16)));
         profile.add(avatar);
         return profile;
+    }
+
+    /** Gives a component a hand cursor, a tooltip, and a click action. */
+    private static void makeClickable(javax.swing.JComponent component, Runnable action) {
+        component.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
+        component.setToolTipText("View profile");
+        component.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent event) {
+                if (javax.swing.SwingUtilities.isLeftMouseButton(event)) {
+                    action.run();
+                }
+            }
+        });
     }
 
     private static Image loadLogo() {
@@ -151,7 +178,8 @@ public class GUIHeader extends JPanel {
             int baseline = (getHeight() + main.getAscent() - main.getDescent()) / 2 + GUIUtility.scale(4);
             g2.drawString(TEXT, 0, baseline);
             g2.setFont(tmFont);
-            g2.drawString("TM", main.stringWidth(TEXT) + 4, baseline - main.getAscent() + g2.getFontMetrics().getAscent());
+            g2.drawString("TM", main.stringWidth(TEXT) + 4,
+                    baseline - main.getAscent() + g2.getFontMetrics().getAscent());
             g2.dispose();
         }
     }
