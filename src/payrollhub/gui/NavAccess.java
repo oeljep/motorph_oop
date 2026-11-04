@@ -37,21 +37,17 @@ public final class NavAccess {
         Collections.addAll(allowed, STAFF);
 
         switch (key) {
-            case "admin":
             case "humanresources":
-            case "humanresources admin":
                 allowed.add(NavTab.EMPLOYEES);
-                allowed.add(NavTab.TICKET_MANAGER);
                 break;
             case "accounting":
                 allowed.add(NavTab.PAYROLL_MANAGER);
                 allowed.add(NavTab.TICKET_MANAGER);
                 break;
-            case "accounting admin":
-            case "chief admin":
+            case "admin":
                 allowed.add(NavTab.EMPLOYEES);
-                allowed.add(NavTab.PAYROLL_MANAGER);
                 allowed.add(NavTab.TICKET_MANAGER);
+                allowed.add(NavTab.LEAVE_MANAGER);
                 break;
             default:
                 // Regular and anything unrecognised: staff tabs only.
@@ -71,7 +67,7 @@ public final class NavAccess {
      * Checks whether a role may open a particular tab.
      *
      * @param role the role text from users.csv
-     * @param tab the tab to check
+     * @param tab  the tab to check
      * @return true only when the tab is included in that role's access list
      */
     public static boolean canOpen(String role, NavTab tab) {

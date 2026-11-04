@@ -2,9 +2,9 @@
 
 Payroll Hub is a Java 17 Swing payroll application for MotorPH. The GUI is connected to a local CSV data layer: employee, account, attendance, and leave operations use `CsvHandler`; attendance writes are validated by `AttendanceService`; and payslip views use `PayslipCalculator` and `PayrollCalculator`.
 
-> **MO-IT110 Object-Oriented Programming · Milestone 1**
+> **MO-IT110 Object-Oriented Programming · Milestone 2**
 >
-> Mapúa-Malayan Digital College · Section S2101 · Group 7
+> Mapúa-Malayan Digital College · Section S2101
 
 ## Current implementation status
 
@@ -14,7 +14,7 @@ Payroll Hub is a Java 17 Swing payroll application for MotorPH. The GUI is conne
 | Dashboard overview | Implemented. Management roles see employee headcount, basic payroll totals, average salary, pending leave count, and an employee table; staff see their own employment, pay, allowance, attendance, and pending-leave summaries. |
 | Employee records | Implemented. Search, view, add, edit, and delete screens use `CsvHandler`; add/delete and edit controls vary by role. |
 | Time tracker | Implemented. Employees can clock in/out and review their own attendance history. `AttendanceService` writes records; `AttendanceRules` supplies late-minute and paid-hour calculations. |
-| Leave requests | Implemented. Users can file and view requests; authorized Admin/HR roles can approve or reject other employees’ requests. Data is persisted in `leaves.csv`. |
+| Leave requests | Implemented. Users can file and view requests; authorized Admin/HR roles can view and decide leave requests for their direct reports only. Data is persisted in `leaves.csv`. |
 | Payslip and payroll screens | Connected to employee and attendance data. The payroll calculation rules and attendance/pay assumptions still require review against the course/source payroll policy before treating the output as production-verified. |
 | Ticket manager | Implemented in the GUI/data layer. Tickets are persisted to `src/data/tickets.csv`, created on first filing; replies and status updates are saved. |
 | Password recovery | Implemented through the login recovery flow and `UserService`. It is not an IT staff dashboard. |
@@ -28,7 +28,7 @@ The current source was verified with a Java 17 compile and the read-only `GuiBac
 - Role-specific management and employee dashboard summaries.
 - Employee search, profile viewing, and role-limited add/edit/delete actions.
 - Employee self-service clock in/out and monthly attendance history.
-- Leave filing, calendar display, and role-limited approval/rejection.
+- Leave filing, calendar display, and direct-report-scoped approval/rejection for Admin/HR.
 - Employee payslip display and accounting payroll table/export.
 - Ticket filing from payslip concerns and ticket response/status handling.
 - Password recovery using account and employee identity details.
@@ -104,14 +104,7 @@ In NetBeans, open the folder containing `pom.xml` as a Maven project and run `pa
 - **Payroll validation:** Existing payroll methods and current payslip output need reconciliation with the authoritative MotorPH/course policy. Existing payroll tests currently report failures; confirm the rules before relying on figures.
 - **Credential storage:** `users.csv` currently stores passwords as plaintext. This is a known security limitation; do not use real credentials.
 
-## Team
-
-**Group 7, Section S2101**
-
-- Rowel Jepsani
-- Kristel Austria
-- Russell Jae Udaundo
-- Isabelle Angeli Gallardo
+## Rowel Jepsani
 
 ## Academic notice
 

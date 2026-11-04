@@ -84,6 +84,8 @@ public class GUIDashboard extends JFrame {
                 return new GUIPayrollManager();
             case TICKET_MANAGER:
                 return new GUITicketManager(user.getEmpNo());
+            case LEAVE_MANAGER:
+                return new GUILeaveManager(user.getRole(), user.getEmpNo());
             default:
                 return createPlaceholder(tab);
         }
@@ -121,7 +123,9 @@ public class GUIDashboard extends JFrame {
         return panel;
     }
 
-    /** First name of the signed-in employee, or the role name if no record is found. */
+    /**
+     * First name of the signed-in employee, or the role name if no record is found.
+     */
     private static String firstNameOf(GUIUser user) {
         try {
             Optional<EmployeeData> employee = CsvHandler.findEmployee(user.getEmpNo());
