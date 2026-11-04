@@ -324,8 +324,14 @@
 -shows one generic message on failure"
 ,GUILogin,isPasswordValid,Checks a password against the validity rules before submission.,public,String pass,boolean,Delegates to the UserHub implementation.
 ,GUILogin,getPasswordStrength,Shows how strong the typed password is.,public,String pass,int (0-5),Delegates to the UserHub implementation.
-,GUILogin,openDashboardForRole,Opens the dashboard that fits the logged-in user.,private,Employee user,void,Uses getRole() and instanceof; nothing opens if the role is unknown.
+,GUILogin,openDashboardForRole,Opens the shared dashboard for the authenticated user.,private,GUIUser user,void,Implemented. Every authenticated role enters GUIDashboard; NavAccess determines the available tabs.
 ,GUILogin,clearFields,Empties the input fields.,private,none,void,Called after a failed or finished login.
+,,,,,,,
+,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
+,GUILogin$LoginCard,loadLogo,Loads the login logo image from the classpath.,private static,none,Image,Returns null when the configured image resource is unavailable.
+,GUILogin$LoginCard,paintComponent,Paints the maroon card inset panel and logo.,protected,Graphics g,void,Implemented. Delegates logo painting after painting the card and inset panel.
+,GUILogin$LoginCard,paintInsetPanel,Paints the white rounded form panel and its inner shadow.,private,Graphics2D g2,void,Implemented. Inner shadow is clipped to the rounded panel.
+,GUILogin$LoginCard,paintLogo,Draws the logo tilted by -4.1 degrees.,private,Graphics2D g2,void,Implemented. Clips the actual logo to a rounded rectangle; no external drop shadow or black square is painted.
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,GUIForgotPass,GUIForgotPass,Builds the password recovery screen.,public,none,Constructor,None
@@ -340,14 +346,22 @@
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,Status,GUI/backend integration,Records current implemented UI-to-data and service relationships.,documentation,none,Status,Implemented features are backed by CsvHandler and services. This section supersedes older GUI method descriptions above where signatures or behavior differ.
 ,GUIDashboard,GUIDashboard,Builds the signed-in application shell.,public,GUIUser user,Constructor,Implemented. Creates header sidebar and tab content for the authenticated employee.
-,GUIDashboard,createScreen,Creates the panel assigned to a permitted navigation tab.,private,NavTab tab,JPanel,Implemented. Routes the dashboard to GUIDashboardHome and the other permitted tabs to their dedicated screens.
+,GUIDashboard,createScreen,Creates the panel assigned to a permitted navigation tab.,private,NavTab tab,JPanel,Implemented. Routes DASHBOARD TIME_TRACKER SCHEDULE PAYSLIP EMPLOYEES PAYROLL_MANAGER TICKET_MANAGER and LEAVE_MANAGER to dedicated screens; other tabs use a placeholder.
 ,GUIDashboard,showTab,Checks access and displays a freshly created tab screen.,private,NavTab tab,void,Implemented. Rejects tabs not returned by NavAccess for the signed-in role.
+,GUIDashboard,showCard,Replaces and displays a named content card.,private,"String name, JPanel screen",void,Implemented. Removes the prior panel for that card then revalidates and shows the new panel.
+,GUIDashboard,createPlaceholder,Builds a placeholder for a tab without a dedicated screen.,private,NavTab tab,JPanel,Displays a coming-soon message.
 ,GUIDashboardHome,GUIDashboardHome,Builds a role-specific dashboard overview.,public,"String role, int empNo",Constructor,Implemented. Management view is selected using NavAccess.isManagement; read failures are displayed on the panel.
 ,GUIDashboardHome,buildManagementView,Displays company-level summary cards and employee table.,private,none,void,Implemented. Uses CsvHandler employee records and pending leave count; basic payroll excludes allowances.
 ,GUIDashboardHome,buildPersonalView,Displays the signed-in employee’s employment and personal summary cards.,private,none,void,Implemented. Loads employee-specific latest attendance month plus own pending leave count and compensation data.
 ,GUIDashboard,showProfile,Displays the signed-in employee profile.,private,none,void,Implemented. Reads employee data through GUIViewProfile and CsvHandler.
+,GUIDashboard,logout,Returns to sign-in and closes the dashboard.,private,none,void,Implemented. Opens GUILogin and disposes the current frame.
 ,NavAccess,tabsFor,Returns dashboard tabs allowed for a role.,public static,String role,"List<NavTab>",Implemented. Unknown roles receive staff tabs only.
 ,NavAccess,canOpen,Checks whether a role may open a tab.,public static,"String role, NavTab tab",boolean,Implemented and used by sidebar and dashboard navigation.
+,NavAccess,isManagement,Determines whether dashboard overview uses company-wide metrics.,public static,String role,boolean,True when the role can open an employee payroll or ticket management tab.
+,GUILeaveManager,GUILeaveManager,Builds the company leave management screen.,public,"String role, int empNo",Constructor,Implemented. Displays all requests; approval controls are shown only to roles allowed by ActionAccess.
+,GUILeaveManager,reload,Loads and displays leave requests with employee names and pending totals.,private,none,void,Implemented. Reads through CsvHandler and reports read errors in the screen.
+,GUILeaveManager,applyFilter,Applies the text and status filters to the leave table.,private,none,void,Implemented. Filters table rows without changing stored leave data.
+,GUILeaveManager,decide,Approves or rejects a selected pending leave request.,private,String newStatus,void,Implemented. Rechecks role pending status and self-approval restriction before calling CsvHandler.updateLeaveStatus.
 ,ActionAccess,canAddOrDeleteEmployee,Checks employee add/delete permission.,public static,String role,boolean,Implemented. Admin and Chief Admin only.
 ,ActionAccess,canEditEmployee,Checks employee edit permission.,public static,String role,boolean,Implemented. Admin Chief Admin and HR roles.
 ,ActionAccess,canDecideLeave,Checks leave decision permission.,public static,String role,boolean,Implemented. Delegates to employee edit permission.

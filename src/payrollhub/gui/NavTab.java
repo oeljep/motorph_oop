@@ -11,7 +11,8 @@ public enum NavTab {
     PAYSLIP("Payslip"),
     EMPLOYEES("Employees"),
     PAYROLL_MANAGER("Payroll Manager"),
-    TICKET_MANAGER("Ticket Manager");
+    TICKET_MANAGER("Ticket Manager"),
+    LEAVE_MANAGER("Leave Manager");
 
     private final String label;
 

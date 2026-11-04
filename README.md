@@ -2,9 +2,9 @@
 
 Payroll Hub is a Java 17 Swing payroll application for MotorPH. The GUI is connected to a local CSV data layer: employee, account, attendance, and leave operations use `CsvHandler`; attendance writes are validated by `AttendanceService`; and payslip views use `PayslipCalculator` and `PayrollCalculator`.
 
-> **MO-IT110 Object-Oriented Programming · Milestone 1**
+> **MO-IT110 Object-Oriented Programming · Milestone 2**
 >
-> Mapúa-Malayan Digital College · Section S2101 · Group 7
+> Mapúa-Malayan Digital College · Section S2101
 
 ## Current implementation status
 
@@ -104,14 +104,7 @@ In NetBeans, open the folder containing `pom.xml` as a Maven project and run `pa
 - **Payroll validation:** Existing payroll methods and current payslip output need reconciliation with the authoritative MotorPH/course policy. Existing payroll tests currently report failures; confirm the rules before relying on figures.
 - **Credential storage:** `users.csv` currently stores passwords as plaintext. This is a known security limitation; do not use real credentials.
 
-## Team
-
-**Group 7, Section S2101**
-
-- Rowel Jepsani
-- Kristel Austria
-- Russell Jae Udaundo
-- Isabelle Angeli Gallardo
+## Rowel Jepsani
 
 ## Academic notice
 

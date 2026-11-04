@@ -29,7 +29,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -47,10 +46,8 @@ import payrollhub.data.LeaveData;
  * the signed-in employee's time off, a form to file a leave request, and the
  * list of requests.
  *
- * Every employee sees and files their own requests. Roles allowed by
- * {@link ActionAccess#canDecideLeave(String)} (Admin and HR) also see everyone's
- * requests and get Approve and Reject buttons. Nobody can decide their own
- * request. All file access goes through {@link CsvHandler}.
+ * Every employee sees and files their own requests. All file access goes
+ * through {@link CsvHandler}.
  */
 public class GUILeave extends JPanel {
 
@@ -63,7 +60,6 @@ public class GUILeave extends JPanel {
     private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("d MMM yy", Locale.ENGLISH);
 
     private final int empNo;
-    private final boolean canDecide;
     private YearMonth month = YearMonth.now();
 
     private final JLabel monthLabel = new JLabel("", SwingConstants.CENTER);
@@ -104,7 +100,6 @@ public class GUILeave extends JPanel {
      */
     public GUILeave(String role, int empNo) {
         this.empNo = empNo;
-        this.canDecide = ActionAccess.canDecideLeave(role);
 
         setBackground(GUIUtility.PAGE_BACKGROUND);
         setLayout(new BorderLayout(0, GUIUtility.scale(20)));
@@ -220,26 +215,12 @@ public class GUILeave extends JPanel {
     }
 
     private JPanel createRequestsCard() {
-        JLabel heading = new JLabel(canDecide ? "Leave requests" : "My requests");
+        JLabel heading = new JLabel("My requests");
         heading.setFont(GUIUtility.bodyFont(Font.BOLD, 16f));
-
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        footer.setOpaque(false);
-        if (canDecide) {
-            JButton approve = GUIUtility.createActionButton("Approve", new Color(0x1E7A46));
-            JButton reject = GUIUtility.createActionButton("Reject", GUIUtility.INK_DARK);
-            approve.addActionListener(event -> decide(LeaveData.APPROVED));
-            reject.addActionListener(event -> decide(LeaveData.REJECTED));
-            footer.add(approve);
-            footer.add(reject);
-        }
 
         JPanel card = GUIUtility.createCardPanel(new BorderLayout(0, 10));
         card.add(heading, BorderLayout.NORTH);
         card.add(GUIUtility.wrapTable(requestTable), BorderLayout.CENTER);
-        if (canDecide) {
-            card.add(footer, BorderLayout.SOUTH);
-        }
         return card;
     }
 
@@ -284,7 +265,7 @@ public class GUILeave extends JPanel {
                     mine.add(leave);
                 }
             }
-            shown = new ArrayList<>(canDecide ? all : mine);
+            shown = new ArrayList<>(mine);
             shown.sort(Comparator.comparing(LeaveData::isPending).reversed()
                     .thenComparing(LeaveData::getStartDate, Comparator.reverseOrder()));
         } catch (IOException e) {
@@ -407,32 +388,4 @@ public class GUILeave extends JPanel {
         }
     }
 
-    private void decide(String newStatus) {
-        if (!canDecide) {
-            return; // the buttons only exist for approvers; this guards direct calls
-        }
-        int row = requestTable.getSelectedRow();
-        if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Select a request first.", "Leave", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        LeaveData leave = shown.get(requestTable.convertRowIndexToModel(row));
-        if (!leave.isPending()) {
-            JOptionPane.showMessageDialog(this, "That request is already " + leave.getStatus().toLowerCase(Locale.ROOT) + ".",
-                    "Leave", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        if (leave.getEmpNo() == empNo) {
-            JOptionPane.showMessageDialog(this, "You cannot decide your own leave request.",
-                    "Leave", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        try {
-            CsvHandler.updateLeaveStatus(leave.getLeaveId(), newStatus);
-            reload();
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Could not save the decision: " + e.getMessage(),
-                    "Leave", JOptionPane.ERROR_MESSAGE);
-        }
-    }
 }
