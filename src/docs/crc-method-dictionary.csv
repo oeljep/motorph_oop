@@ -358,8 +358,8 @@
 ,NavAccess,tabsFor,Returns dashboard tabs allowed for a role.,public static,String role,"List<NavTab>",Implemented. Unknown roles receive staff tabs only.
 ,NavAccess,canOpen,Checks whether a role may open a tab.,public static,"String role, NavTab tab",boolean,Implemented and used by sidebar and dashboard navigation.
 ,NavAccess,isManagement,Determines whether dashboard overview uses company-wide metrics.,public static,String role,boolean,True when the role can open an employee payroll or ticket management tab.
-,GUILeaveManager,GUILeaveManager,Builds the company leave management screen.,public,"String role, int empNo",Constructor,Implemented. Displays all requests; approval controls are shown only to roles allowed by ActionAccess.
-,GUILeaveManager,reload,Loads and displays leave requests with employee names and pending totals.,private,none,void,Implemented. Reads through CsvHandler and reports read errors in the screen.
+,GUILeaveManager,GUILeaveManager,Builds the leave management screen for an approver's direct reports.,public,"String role, int empNo",Constructor,Implemented. Displays only direct reports' requests; approval controls are shown only to roles allowed by ActionAccess.
+,GUILeaveManager,reload,Loads and displays direct reports' leave requests with employee names and pending totals.,private,none,void,Implemented. Resolves direct reports through CsvHandler.findSupervisor and reads leave data through CsvHandler; reports read errors in the screen.
 ,GUILeaveManager,applyFilter,Applies the text and status filters to the leave table.,private,none,void,Implemented. Filters table rows without changing stored leave data.
 ,GUILeaveManager,decide,Approves or rejects a selected pending leave request.,private,String newStatus,void,Implemented. Rechecks role pending status and self-approval restriction before calling CsvHandler.updateLeaveStatus.
 ,ActionAccess,canAddOrDeleteEmployee,Checks employee add/delete permission.,public static,String role,boolean,Implemented. Admin and Chief Admin only.

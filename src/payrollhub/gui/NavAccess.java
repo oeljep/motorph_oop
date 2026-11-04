@@ -39,10 +39,10 @@ public final class NavAccess {
         switch (key) {
             case "humanresources":
                 allowed.add(NavTab.EMPLOYEES);
-                allowed.add(NavTab.TICKET_MANAGER);
                 break;
             case "accounting":
                 allowed.add(NavTab.PAYROLL_MANAGER);
+                allowed.add(NavTab.TICKET_MANAGER);
                 break;
             case "admin":
                 allowed.add(NavTab.EMPLOYEES);

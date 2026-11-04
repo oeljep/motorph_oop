@@ -3,7 +3,9 @@ package payrollhub.test;
 import java.awt.Component;
 import java.awt.Container;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JLabel;
@@ -16,6 +18,7 @@ import payrollhub.data.EmployeeData;
 import payrollhub.data.LeaveData;
 import payrollhub.data.TicketData;
 import payrollhub.gui.GUIDashboardHome;
+import payrollhub.gui.GUILeaveManager;
 import payrollhub.service.AttendanceRules;
 import payrollhub.service.PayslipCalculator;
 import payrollhub.service.PayslipData;
@@ -50,9 +53,13 @@ public final class GuiBackendIntegrationTest {
 
         AtomicReference<GUIDashboardHome> managementHome = new AtomicReference<>();
         AtomicReference<GUIDashboardHome> personalHome = new AtomicReference<>();
+        AtomicReference<GUILeaveManager> adminLeaveManager = new AtomicReference<>();
+        AtomicReference<GUILeaveManager> hrLeaveManager = new AtomicReference<>();
         SwingUtilities.invokeAndWait(() -> {
             managementHome.set(new GUIDashboardHome("Admin", empNo));
             personalHome.set(new GUIDashboardHome("Regular", empNo));
+            adminLeaveManager.set(new GUILeaveManager("Admin", 10002));
+            hrLeaveManager.set(new GUILeaveManager("HumanResources", 10002));
         });
         check(containsLabel(managementHome.get(), "Payroll Overview")
                         && containsLabel(managementHome.get(), "Pending leave requests"),
@@ -64,6 +71,11 @@ public final class GuiBackendIntegrationTest {
                         && containsLabel(personalHome.get(), "Attendance")
                         && containsLabel(personalHome.get(), "Pending leave requests"),
                 "staff dashboard displays personal payroll, attendance and leave summaries");
+        Set<String> directReportLeaveIds = Set.of("L0005", "L0006", "L0015");
+        check(leaveIds(adminLeaveManager.get()).equals(directReportLeaveIds),
+                "Admin leave manager displays only direct reports' requests");
+        check(leaveIds(hrLeaveManager.get()).equals(directReportLeaveIds),
+                "HR leave manager displays only direct reports' requests");
 
         TicketData ticket = TicketData.newTicket("T99999", empNo, "Test subject", "Test message");
         TicketData reloaded = TicketData.fromCsvRow(ticket.toCsvRow());
@@ -105,5 +117,17 @@ public final class GuiBackendIntegrationTest {
             }
         }
         return null;
+    }
+
+    private static Set<String> leaveIds(GUILeaveManager manager) {
+        JTable table = findTable(manager);
+        if (table == null) {
+            throw new AssertionError("leave manager table is available");
+        }
+        Set<String> ids = new HashSet<>();
+        for (int row = 0; row < table.getRowCount(); row++) {
+            ids.add((String) table.getValueAt(row, 0));
+        }
+        return ids;
     }
 }

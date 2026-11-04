@@ -8,9 +8,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
@@ -32,7 +34,7 @@ import payrollhub.data.EmployeeData;
 import payrollhub.data.LeaveData;
 
 /**
- * Leave Management screen for approvers: every employee's leave requests with
+ * Leave Management screen for approvers: direct reports' leave requests with
  * Approve and Reject. Employees file and track their own requests in
  * {@link GUILeave}; deciding requests lives only here.
  *
@@ -140,10 +142,22 @@ public class GUILeaveManager extends JPanel {
         model.setRowCount(0);
         try {
             names.clear();
-            for (EmployeeData e : CsvHandler.loadEmployees()) {
+            List<EmployeeData> employees = CsvHandler.loadEmployees();
+            Set<Integer> directReportEmpNos = new HashSet<>();
+            for (EmployeeData e : employees) {
                 names.put(e.getEmpNo(), e.getFullName());
+                if (CsvHandler.findSupervisor(e, employees)
+                        .map(supervisor -> supervisor.getEmpNo() == empNo)
+                        .orElse(false)) {
+                    directReportEmpNos.add(e.getEmpNo());
+                }
             }
-            leaves = new ArrayList<>(CsvHandler.loadLeaves());
+            leaves = new ArrayList<>();
+            for (LeaveData leave : CsvHandler.loadLeaves()) {
+                if (directReportEmpNos.contains(leave.getEmpNo())) {
+                    leaves.add(leave);
+                }
+            }
             leaves.sort(Comparator.comparing(LeaveData::isPending).reversed()
                     .thenComparing(LeaveData::getStartDate, Comparator.reverseOrder()));
             int pending = 0;
