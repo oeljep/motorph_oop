@@ -99,14 +99,14 @@
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,HumanResources,updateEmployeeDetails,"Updates personnel records (e.g., address, position) in the CSV database.",public,int empNo,void,Permission: Requires EMPLOYEE_UPDATE. empID must exist in CSV.
 ,HumanResources,viewEmployeeProfile,Retrieves full employee details for HR review.,public,int empID,Employee,Permission: Requires EMPLOYEE_READ. Returns the employee object if found.
-,HumanResources,approveLeaveRequest,Switches a leave request status from PENDING to APPROVED.,public,String leaveID,void,Workflow: Validates that the leave request exists and is currently PENDING.
-,HumanResources,rejectLeaveRequest,Rejects a leave request and records the reason for the denial.,public,"String leaveID, String reason",void,Logic: Updates the Leave CSV with the rejection status and note.
-,HumanResources,viewAllLeaveRequests,Pulls a master list of all pending and processed leaves for the company.,public,none,List<LeaveRequest>,Abstraction: Delegated to LeaveService to fetch data from file.
+ ,HumanResources,approveLeaveRequest,Legacy leave approval method retained for compatibility; the current UI policy restricts leave approval to Admin only.,public,String leaveID,void,Current access rule: NavAccess.canDecideLeave returns true for Admin only.
+,HumanResources,rejectLeaveRequest,Legacy leave rejection method retained for compatibility; the current UI policy restricts leave rejection to Admin only.,public,"String leaveID, String reason",void,Current access rule: NavAccess.canDecideLeave returns true for Admin only.
+,HumanResources,viewAllLeaveRequests,Legacy leave review method retained for compatibility; the current dashboard does not expose HR leave management.,public,none,List<LeaveRequest>,Current access rule: leave review is limited to Admin in the active UI.
 ,HumanResources,getRole,Returns the specific role for dashboard rendering.,public,none,Position,Returns Role.HR_STAFF (High-level personnel access).
 ,HumanResources,authenticate,Validates HR credentials to grant system access.,public,"String user, String pass",boolean,@Override: Inherited from Employee. Implements HR-specific security checks.
 ,HumanResources,calculateGrossSalary,Calculates total pay including HR-specific allowances.,public,none,double,Formula: (Hourly Rate * 160) + Allowances.
 ,HumanResources,calculatePay,Overrides the parent method and returns HR gross pay.,public,none,double,@Override: returns gross pay for HumanResources.
-,HumanResources,updateLeaveStatus,The authority to Approve or Reject a request.,public,"String leaveID, String newStatus",void,Polymorphic Authorization: Only classes implementing LeaveHub can execute this.
+,HumanResources,updateLeaveStatus,Legacy approval path kept for compatibility; current access policy limits leave decisions to Admin.,public,"String leaveID, String newStatus",void,Current access rule: NavAccess.canDecideLeave returns true for Admin only.
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,Accounting,batchProcessPayroll,Triggers the high-level payroll logic for the current cycle.,public,String payPeriod,void,Role-Based: Only accessible to ACCOUNTING role.
@@ -239,7 +239,7 @@
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,LeaveHub,applyLeave,Submits a new leave request for processing within the payroll system.,public,"String leaveID, int empNo, LocalDate startDate, LocalDate endDate, String reason",LeaveRequest,Abstraction and Workflow Separation: Defines the standardized method for filing a leave request without embedding approval authority; ensures consistent leave submission structure across all implementing roles.
 ,LeaveHub,updateLeaveStatus,Updates the status of an existing leave request (APPROVED or REJECTED).,public,"String leaveID, String newStatus",void,"Enforces that status changes occur only through authorized workflow operations, maintaining separation between leave filing and approval authority"
-,LeaveHub,viewAllLeaveRequests,To retrieve the master list of all requests for review.,public,none,List<LeaveRequest>,Required for Admin/HR roles to audit the company's availability.
+,LeaveHub,viewAllLeaveRequests,To retrieve the master list of all requests for review.,public,none,List<LeaveRequest>,Required for Admin roles to audit the company's availability.
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,LeaveRequest,LeaveRequest (constructor),Creates a new leave request with default status set to PENDING.,public,"String leaveID, int empNo, LocalDate startDate, LocalDate endDate",none,Encapsulation: Ensures the object initializes with a valid state by automatically setting status to PENDING and validating date integrity within the constructor.
@@ -346,7 +346,7 @@
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,Status,GUI/backend integration,Records current implemented UI-to-data and service relationships.,documentation,none,Status,Implemented features are backed by CsvHandler and services. This section supersedes older GUI method descriptions above where signatures or behavior differ.
 ,GUIDashboard,GUIDashboard,Builds the signed-in application shell.,public,GUIUser user,Constructor,Implemented. Creates header sidebar and tab content for the authenticated employee.
-,GUIDashboard,createScreen,Creates the panel assigned to a permitted navigation tab.,private,NavTab tab,JPanel,Implemented. Routes DASHBOARD TIME_TRACKER SCHEDULE PAYSLIP EMPLOYEES PAYROLL_MANAGER TICKET_MANAGER and LEAVE_MANAGER to dedicated screens; other tabs use a placeholder.
+,GUIDashboard,createScreen,Creates the panel assigned to a permitted navigation tab.,private,NavTab tab,JPanel,Implemented. Routes DASHBOARD TIME_TRACKER SCHEDULE PAYSLIP EMPLOYEE_MANAGER PAYROLL_MANAGER DISPUTE_MANAGER LEAVE_MANAGER and TICKET_MANAGER to dedicated screens; other tabs use a placeholder.
 ,GUIDashboard,showTab,Checks access and displays a freshly created tab screen.,private,NavTab tab,void,Implemented. Rejects tabs not returned by NavAccess for the signed-in role.
 ,GUIDashboard,showCard,Replaces and displays a named content card.,private,"String name, JPanel screen",void,Implemented. Removes the prior panel for that card then revalidates and shows the new panel.
 ,GUIDashboard,createPlaceholder,Builds a placeholder for a tab without a dedicated screen.,private,NavTab tab,JPanel,Displays a coming-soon message.
@@ -357,14 +357,14 @@
 ,GUIDashboard,logout,Returns to sign-in and closes the dashboard.,private,none,void,Implemented. Opens GUILogin and disposes the current frame.
 ,NavAccess,tabsFor,Returns dashboard tabs allowed for a role.,public static,String role,"List<NavTab>",Implemented. Unknown roles receive staff tabs only.
 ,NavAccess,canOpen,Checks whether a role may open a tab.,public static,"String role, NavTab tab",boolean,Implemented and used by sidebar and dashboard navigation.
-,NavAccess,isManagement,Determines whether dashboard overview uses company-wide metrics.,public static,String role,boolean,True when the role can open an employee payroll or ticket management tab.
-,GUILeaveManager,GUILeaveManager,Builds the leave management screen for an approver's direct reports.,public,"String role, int empNo",Constructor,Implemented. Displays only direct reports' requests; approval controls are shown only to roles allowed by ActionAccess.
+,NavAccess,isManagement,Determines whether dashboard overview uses company-wide metrics.,public static,String role,boolean,True when the role can open an employee, payroll, or dispute management tab.
+,GUILeaveManager,GUILeaveManager,Builds the leave management screen for an approver's direct reports.,public,"String role, int empNo",Constructor,Implemented. Displays only direct reports' requests; approval controls are shown only to roles allowed by NavAccess.canDecideLeave.
 ,GUILeaveManager,reload,Loads and displays direct reports' leave requests with employee names and pending totals.,private,none,void,Implemented. Resolves direct reports through CsvHandler.findSupervisor and reads leave data through CsvHandler; reports read errors in the screen.
 ,GUILeaveManager,applyFilter,Applies the text and status filters to the leave table.,private,none,void,Implemented. Filters table rows without changing stored leave data.
 ,GUILeaveManager,decide,Approves or rejects a selected pending leave request.,private,String newStatus,void,Implemented. Rechecks role pending status and self-approval restriction before calling CsvHandler.updateLeaveStatus.
-,ActionAccess,canAddOrDeleteEmployee,Checks employee add/delete permission.,public static,String role,boolean,Implemented. Admin and Chief Admin only.
-,ActionAccess,canEditEmployee,Checks employee edit permission.,public static,String role,boolean,Implemented. Admin Chief Admin and HR roles.
-,ActionAccess,canDecideLeave,Checks leave decision permission.,public static,String role,boolean,Implemented. Delegates to employee edit permission.
+,NavAccess,canAddOrDeleteEmployee,Checks employee add/delete permission.,public static,String role,boolean,Implemented. Admin only; HumanResources is limited to Employee Manager.
+,NavAccess,canEditEmployee,Checks employee edit permission.,public static,String role,boolean,Implemented. Admin and HumanResources roles.
+,NavAccess,canDecideLeave,Checks leave decision permission.,public static,String role,boolean,Implemented. Delegates to the admin and HumanResources permission check.
 ,GUITimesheet,GUITimesheet,Builds the employee time tracker and attendance history.,public,int empNo,Constructor,Implemented. Loads the signed-in employee’s attendance from CsvHandler.
 ,GUITimesheet,onClock,Records the employee’s current check-in or check-out.,private,none,void,Implemented. Calls CsvHandler which delegates write validation to AttendanceService.
 ,GUITimesheet,refreshToday,Loads and renders today’s attendance state.,private,none,void,Implemented. Displays data read through CsvHandler.findAttendance.

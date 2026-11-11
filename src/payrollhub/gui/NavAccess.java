@@ -8,8 +8,7 @@ import java.util.Locale;
 
 /**
  * Decides which sidebar tabs a user may open, based on the role stored in
- * users.csv (Chief Admin, Admin, HumanResources, HumanResources Admin,
- * Accounting, Accounting Admin, Regular).
+ * users.csv (Admin, HumanResources, Accounting, InfoTech, Regular).
  *
  * This is the single place to change access. Screens never check role names
  * themselves; they ask this class. An unknown role gets the same tabs as a
@@ -38,16 +37,18 @@ public final class NavAccess {
 
         switch (key) {
             case "humanresources":
-                allowed.add(NavTab.EMPLOYEES);
+                allowed.add(NavTab.EMPLOYEE_MANAGER);
                 break;
             case "accounting":
                 allowed.add(NavTab.PAYROLL_MANAGER);
-                allowed.add(NavTab.TICKET_MANAGER);
+                allowed.add(NavTab.DISPUTE_MANAGER);
                 break;
             case "admin":
-                allowed.add(NavTab.EMPLOYEES);
-                allowed.add(NavTab.TICKET_MANAGER);
+                allowed.add(NavTab.EMPLOYEE_MANAGER);
                 allowed.add(NavTab.LEAVE_MANAGER);
+                break;
+            case "infotech":
+                allowed.add(NavTab.TICKET_MANAGER);
                 break;
             default:
                 // Regular and anything unrecognised: staff tabs only.
@@ -82,8 +83,31 @@ public final class NavAccess {
      * @return true for management roles, false for regular staff
      */
     public static boolean isManagement(String role) {
-        return canOpen(role, NavTab.EMPLOYEES)
+        return canOpen(role, NavTab.EMPLOYEE_MANAGER)
                 || canOpen(role, NavTab.PAYROLL_MANAGER)
-                || canOpen(role, NavTab.TICKET_MANAGER);
+                || canOpen(role, NavTab.DISPUTE_MANAGER);
+    }
+
+    public static boolean isTechnical(String role) {
+        return canOpen(role, NavTab.TICKET_MANAGER);
+    }
+
+    public static boolean canAddOrDeleteEmployee(String role) {
+        String normalized = normalize(role);
+        return normalized.equals("admin");
+    }
+
+    public static boolean canEditEmployee(String role) {
+        String normalized = normalize(role);
+        return normalized.equals("admin") || normalized.equals("humanresources");
+    }
+
+    public static boolean canDecideLeave(String role) {
+        String normalized = normalize(role);
+        return normalized.equals("admin");
+    }
+
+    private static String normalize(String role) {
+        return role == null ? "" : role.trim().toLowerCase(Locale.ROOT);
     }
 }

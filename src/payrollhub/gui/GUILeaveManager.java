@@ -38,7 +38,7 @@ import payrollhub.data.LeaveData;
  * Approve and Reject. Employees file and track their own requests in
  * {@link GUILeave}; deciding requests lives only here.
  *
- * Only roles allowed by {@link ActionAccess#canDecideLeave(String)} get the
+ * Only roles allowed by {@link NavAccess#canDecideLeave(String)} get the
  * Approve and Reject buttons, and nobody can decide their own request. All file
  * access goes through {@link CsvHandler}.
  */
@@ -118,7 +118,7 @@ public class GUILeaveManager extends JPanel {
         JPanel bottom = new JPanel(new BorderLayout());
         bottom.setOpaque(false);
         bottom.add(summaryLabel, BorderLayout.WEST);
-        if (ActionAccess.canDecideLeave(role)) {
+        if (NavAccess.canDecideLeave(role)) {
             JButton approve = GUIUtility.createActionButton("Approve", new Color(0x1E7A46));
             JButton reject = GUIUtility.createActionButton("Reject", GUIUtility.BRAND_RED);
             approve.addActionListener(event -> decide(LeaveData.APPROVED));
@@ -201,7 +201,7 @@ public class GUILeaveManager extends JPanel {
     // ---------------------- Actions ----------------------
 
     private void decide(String newStatus) {
-        if (!ActionAccess.canDecideLeave(role)) {
+        if (!NavAccess.canDecideLeave(role)) {
             return; // the buttons only exist for approvers; this guards direct calls
         }
         int row = table.getSelectedRow();

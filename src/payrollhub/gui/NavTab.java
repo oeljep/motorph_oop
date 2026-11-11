@@ -9,10 +9,11 @@ public enum NavTab {
     TIME_TRACKER("Time Tracker"),
     SCHEDULE("Schedule"),
     PAYSLIP("Payslip"),
-    EMPLOYEES("Employees"),
+    EMPLOYEE_MANAGER("Employee Manager"),
     PAYROLL_MANAGER("Payroll Manager"),
-    TICKET_MANAGER("Ticket Manager"),
-    LEAVE_MANAGER("Leave Manager");
+    DISPUTE_MANAGER("Dispute Manager"),
+    LEAVE_MANAGER("Leave Manager"),
+    TICKET_MANAGER("Ticket Manager");
 
     private final String label;
 

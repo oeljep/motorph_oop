@@ -29,9 +29,9 @@ import payrollhub.data.EmployeeData;
 
 /**
  * Employees tab: searchable employee list. Everyone who can open the tab can
- * view a profile; Add, Edit and Delete follow {@link ActionAccess}.
+ * view a profile; Add, Edit and Delete follow {@link NavAccess}.
  */
-public class GUIEmployees extends JPanel {
+public class GUIEmployeeManager extends JPanel {
 
     private static final String[] COLUMNS = { "Emp #", "Last name", "First name", "Position", "Status", "Supervisor" };
 
@@ -57,7 +57,7 @@ public class GUIEmployees extends JPanel {
      * @param role  the signed-in user's role
      * @param empNo the signed-in employee's number
      */
-    public GUIEmployees(String role, int empNo) {
+    public GUIEmployeeManager(String role, int empNo) {
         this.role = role;
         this.empNo = empNo;
         setBackground(GUIUtility.PAGE_BACKGROUND);
@@ -101,12 +101,12 @@ public class GUIEmployees extends JPanel {
         JButton view = GUIUtility.createActionButton("View", GUIUtility.INK_DARK);
         view.addActionListener(event -> viewSelected());
         controls.add(view);
-        if (ActionAccess.canAddOrDeleteEmployee(role)) {
+        if (NavAccess.canAddOrDeleteEmployee(role)) {
             JButton add = GUIUtility.createActionButton("Add", GUIUtility.BRAND_RED);
             add.addActionListener(event -> openForm(null));
             controls.add(add);
         }
-        if (ActionAccess.canEditEmployee(role)) {
+        if (NavAccess.canEditEmployee(role)) {
             JButton edit = GUIUtility.createActionButton("Edit", GUIUtility.INK_DARK);
             edit.addActionListener(event -> {
                 EmployeeData e = selected();
@@ -116,7 +116,7 @@ public class GUIEmployees extends JPanel {
             });
             controls.add(edit);
         }
-        if (ActionAccess.canAddOrDeleteEmployee(role)) {
+        if (NavAccess.canAddOrDeleteEmployee(role)) {
             JButton delete = GUIUtility.createActionButton("Delete", GUIUtility.BRAND_RED);
             delete.addActionListener(event -> deleteSelected());
             controls.add(delete);
@@ -185,7 +185,7 @@ public class GUIEmployees extends JPanel {
     }
 
     private void deleteSelected() {
-        if (!ActionAccess.canAddOrDeleteEmployee(role)) {
+        if (!NavAccess.canAddOrDeleteEmployee(role)) {
             return;
         }
         EmployeeData e = selected();

@@ -29,13 +29,13 @@ import payrollhub.data.EmployeeData;
 /**
  * Add / edit employee dialog. In add mode it also creates the employee's
  * login (default password {@value #DEFAULT_PASSWORD}). Opened from
- * {@link GUIEmployees}; the caller checks {@link ActionAccess} first.
+ * {@link GUIEmployeeManager}; the caller checks NavAccess permissions first.
  */
 public class GUIAddEmployee extends JDialog {
 
     private static final String DEFAULT_PASSWORD = "Motorph123";
-    private static final String[] ROLES = { "Regular", "Accounting", "Accounting Admin", "HumanResources",
-            "HumanResources Admin", "Admin", "Chief Admin" };
+    private static final String[] ROLES = { "Regular", "Accounting", "HumanResources",
+            "Admin", "InfoTech" };
 
     private final EmployeeData existing;
     private boolean saved;
