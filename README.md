@@ -5,6 +5,7 @@ Payroll Hub is a Java 17 Swing payroll application for MotorPH. The GUI is conne
 > **MO-IT110 Object-Oriented Programming · Milestone 2**
 >
 > Mapúa-Malayan Digital College · Section S2101
+> Rowel Jepsani
 
 ## Current implementation status
 
@@ -78,13 +79,19 @@ All application records are stored in CSV files under `src/data/`, relative to t
 
 See the [data dictionary](./src/docs/data-dictionary.md) for field formats and constraints.
 
-## Getting started
 
-### Prerequisites
+## Login credentials
 
-- JDK 17 or later
-- Maven, if using the command line or VS Code Maven launch
-- Apache NetBeans 22 or later is optional
+Login credentials that was pulled from 'users.csv' from each role.
+Password is: Motorph123
+
+| Role in `users.csv` | username |
+|---|---|
+| `Admin` | 'biancaa' or 'christianm' |
+| `HumanResources` | 'rosiea' or 'andreav' |
+| `Accounting` | 'leilam' or 'anthonys' |
+| `Regular` | 'lizethv' or 'vellas' |
+| `InfoTech` | 'eduardh' |
 
 ## Design decisions and limitations
 
@@ -93,8 +100,6 @@ See the [data dictionary](./src/docs/data-dictionary.md) for field formats and c
 - **Role checks:** Navigation and UI actions use centralized role checks in `NavAccess`.
 - **Payroll validation:** Existing payroll methods and current payslip output need reconciliation with the authoritative MotorPH/course policy. Existing payroll tests currently report failures; confirm the rules before relying on figures.
 - **Credential storage:** `users.csv` currently stores passwords as plaintext. This is a known security limitation; do not use real credentials.
-
-## Rowel Jepsani
 
 ## Academic notice
 
