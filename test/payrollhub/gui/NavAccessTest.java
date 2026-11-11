@@ -24,22 +24,16 @@ class NavAccessTest {
         expectedByRole.put("Regular", REGULAR_TABS);
         expectedByRole.put("Admin", List.of(
                 NavTab.DASHBOARD, NavTab.TIME_TRACKER, NavTab.SCHEDULE, NavTab.PAYSLIP,
-                NavTab.EMPLOYEES, NavTab.TICKET_MANAGER));
+                NavTab.EMPLOYEE_MANAGER, NavTab.LEAVE_MANAGER));
         expectedByRole.put("HumanResources", List.of(
                 NavTab.DASHBOARD, NavTab.TIME_TRACKER, NavTab.SCHEDULE, NavTab.PAYSLIP,
-                NavTab.EMPLOYEES, NavTab.TICKET_MANAGER));
-        expectedByRole.put("HumanResources Admin", List.of(
-                NavTab.DASHBOARD, NavTab.TIME_TRACKER, NavTab.SCHEDULE, NavTab.PAYSLIP,
-                NavTab.EMPLOYEES, NavTab.TICKET_MANAGER));
+                NavTab.EMPLOYEE_MANAGER));
         expectedByRole.put("Accounting", List.of(
                 NavTab.DASHBOARD, NavTab.TIME_TRACKER, NavTab.SCHEDULE, NavTab.PAYSLIP,
-                NavTab.PAYROLL_MANAGER, NavTab.TICKET_MANAGER));
-        expectedByRole.put("Accounting Admin", List.of(
+                NavTab.PAYROLL_MANAGER, NavTab.DISPUTE_MANAGER));
+        expectedByRole.put("InfoTech", List.of(
                 NavTab.DASHBOARD, NavTab.TIME_TRACKER, NavTab.SCHEDULE, NavTab.PAYSLIP,
-                NavTab.EMPLOYEES, NavTab.PAYROLL_MANAGER, NavTab.TICKET_MANAGER));
-        expectedByRole.put("Chief Admin", List.of(
-                NavTab.DASHBOARD, NavTab.TIME_TRACKER, NavTab.SCHEDULE, NavTab.PAYSLIP,
-                NavTab.EMPLOYEES, NavTab.PAYROLL_MANAGER, NavTab.TICKET_MANAGER));
+                NavTab.TICKET_MANAGER));
 
         for (Map.Entry<String, List<NavTab>> roleAccess : expectedByRole.entrySet()) {
             String role = roleAccess.getKey();
@@ -59,7 +53,7 @@ class NavAccessTest {
         assertEquals(REGULAR_TABS, NavAccess.tabsFor(null));
         assertEquals(REGULAR_TABS, NavAccess.tabsFor(""));
         assertEquals(REGULAR_TABS, NavAccess.tabsFor("unknown"));
-        assertFalse(NavAccess.canOpen(null, NavTab.EMPLOYEES));
+        assertFalse(NavAccess.canOpen(null, NavTab.EMPLOYEE_MANAGER));
         assertFalse(NavAccess.canOpen("", NavTab.PAYROLL_MANAGER));
         assertFalse(NavAccess.isManagement(null));
         assertFalse(NavAccess.isManagement(""));
@@ -67,15 +61,16 @@ class NavAccessTest {
 
     @Test
     void trimsRoleAndMatchesItWithoutCaseSensitivity() {
-        assertEquals(NavAccess.tabsFor("Chief Admin"), NavAccess.tabsFor("  chief admin  "));
-        assertTrue(NavAccess.canOpen("  chief admin  ", NavTab.EMPLOYEES));
-        assertTrue(NavAccess.canOpen("  chief admin  ", NavTab.PAYROLL_MANAGER));
-        assertTrue(NavAccess.canOpen("  chief admin  ", NavTab.TICKET_MANAGER));
+        assertEquals(NavAccess.tabsFor("Admin"), NavAccess.tabsFor("  admin  "));
+        assertTrue(NavAccess.canOpen("Admin", NavTab.EMPLOYEE_MANAGER));
+        assertFalse(NavAccess.canOpen("Admin", NavTab.DISPUTE_MANAGER));
+        assertTrue(NavAccess.canOpen("Admin", NavTab.LEAVE_MANAGER));
+        assertTrue(NavAccess.canDecideLeave("Admin"));
     }
 
     private static boolean isManagementTab(NavTab tab) {
-        return tab == NavTab.EMPLOYEES
+        return tab == NavTab.EMPLOYEE_MANAGER
                 || tab == NavTab.PAYROLL_MANAGER
-                || tab == NavTab.TICKET_MANAGER;
+                || tab == NavTab.DISPUTE_MANAGER;
     }
 }

@@ -78,14 +78,16 @@ public class GUIDashboard extends JFrame {
                 return new GUILeave(user.getRole(), user.getEmpNo());
             case PAYSLIP:
                 return new GUIPayslip(user.getEmpNo());
-            case EMPLOYEES:
-                return new GUIEmployees(user.getRole(), user.getEmpNo());
+            case EMPLOYEE_MANAGER:
+                return new GUIEmployeeManager(user.getRole(), user.getEmpNo());
             case PAYROLL_MANAGER:
                 return new GUIPayrollManager();
-            case TICKET_MANAGER:
-                return new GUITicketManager(user.getEmpNo());
+            case DISPUTE_MANAGER:
+                return new GUIDisputeManager(user.getEmpNo());
             case LEAVE_MANAGER:
                 return new GUILeaveManager(user.getRole(), user.getEmpNo());
+            case TICKET_MANAGER:
+                return new GUITicketManager();
             default:
                 return createPlaceholder(tab);
         }

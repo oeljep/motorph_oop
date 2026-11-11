@@ -38,7 +38,7 @@ public class GUISidebar extends JPanel {
     /**
      * Creates the sidebar.
      *
-    * @param role     the signed-in user's role, used to determine allowed tabs
+     * @param role     the signed-in user's role, used to determine allowed tabs
      * @param onSelect runs with the tab the user clicks
      */
     public GUISidebar(String role, Consumer<NavTab> onSelect) {
@@ -189,7 +189,7 @@ public class GUISidebar extends JPanel {
                 g2.draw(new Line2D.Double(8, 12, 16, 12));
                 g2.draw(new Line2D.Double(8, 16, 13, 16));
                 break;
-            case EMPLOYEES:
+            case EMPLOYEE_MANAGER:
                 g2.draw(new Ellipse2D.Double(8, 3.5, 8, 8));
                 g2.draw(new Arc2D.Double(4, 14, 16, 14, 0, 180, Arc2D.OPEN));
                 break;
@@ -206,7 +206,7 @@ public class GUISidebar extends JPanel {
                 g2.draw(new Line2D.Double(3, 21, 21, 21));
                 break;
             }
-            case TICKET_MANAGER:
+            case DISPUTE_MANAGER:
                 g2.draw(new RoundRectangle2D.Double(3, 6, 18, 12, 3, 3));
                 g2.setStroke(new BasicStroke(1.9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
                         1f, new float[] { 2f, 2.5f }, 0f));
