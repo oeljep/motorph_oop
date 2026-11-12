@@ -83,24 +83,24 @@ public class GUIAddEmployee extends JDialog {
         grid.setBorder(BorderFactory.createEmptyBorder(16, 20, 8, 20));
         int row = 0;
         row = add(grid, row, "Employee #", empNoField);
-        row = add(grid, row, "Last name", lastName);
-        row = add(grid, row, "First name", firstName);
+        row = add(grid, row, "Last Name", lastName);
+        row = add(grid, row, "First Name", firstName);
         row = add(grid, row, "Birthday (YYYY-MM-DD)", birthday);
         row = add(grid, row, "Address", address);
         row = add(grid, row, "Phone", phone);
         row = add(grid, row, "SSS", sss);
         row = add(grid, row, "PhilHealth", philhealth);
         row = add(grid, row, "TIN", tin);
-        row = add(grid, row, "Pag-IBIG", pagibig);
+        row = add(grid, row, "Pag-Ibig", pagibig);
         row = add(grid, row, "Status", status);
         row = add(grid, row, "Position", position);
         row = add(grid, row, "Supervisor", supervisorBox);
-        row = add(grid, row, "Basic salary", basic);
-        row = add(grid, row, "Rice subsidy", rice);
-        row = add(grid, row, "Phone allowance", phoneAllowance);
-        row = add(grid, row, "Clothing allowance", clothing);
+        row = add(grid, row, "Basic Salary", basic);
+        row = add(grid, row, "Rice Subsidy", rice);
+        row = add(grid, row, "Phone Allowance", phoneAllowance);
+        row = add(grid, row, "Clothing Allowance", clothing);
         if (existing == null) {
-            row = add(grid, row, "Login role", roleBox);
+            row = add(grid, row, "Role", roleBox);
             row = add(grid, row, "Username", userName);
         }
         empNoField.setEditable(false);
@@ -143,7 +143,7 @@ public class GUIAddEmployee extends JDialog {
             } catch (IOException e) {
                 message.setText(e.getMessage());
             }
-            status.setText("Regular");
+            status.setText("New");
             return;
         }
         empNoField.setText(String.valueOf(existing.getEmpNo()));

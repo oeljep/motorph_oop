@@ -32,7 +32,7 @@ public class PayrollCalculator {
                 1035, 1057.5, 1080, 1102.5, 1125
         };
         for (int i = 0; i < limits.length; i++) {
-            if (gross <= limits[i]) {
+            if (Math.floor(gross) <= limits[i]) {
                 return contributions[i];
             }
         }
@@ -42,21 +42,11 @@ public class PayrollCalculator {
     // Calculates the employee's half of the
     // 3% PhilHealth premium based on gross pay, capped at 1,800.
     public double finalPhilHealth(double gross) {
-        double[] range = {
-                10000, 59999.99
-        };
-        double[] rate = {
-                0.03, 0.03
-        };
-        double[] premium = {
-                300, 1799
-        };
-        for (int i = 0; i < range.length; i++) {
-            if (gross <= range[i]) {
-                return Math.min(gross * rate[i], premium[i]) * 0.5;
-            }
+        if (gross <= 0) {
+            return 0;
         }
-        return 1800 * 0.5;
+        double premium = Math.max(300, Math.min(gross * 0.03, 1800));
+        return premium * 0.5;
     }
 
     // Calculates the Pag-IBIG contribution: 0 below 1,000, 1% up to 1,500,
@@ -68,18 +58,18 @@ public class PayrollCalculator {
         if (gross <= 1500) {
             return gross * 0.01;
         }
-        return gross * 0.02;
+        return Math.min(gross * 0.02, 100);
     }
 
     // Computes withholding tax based on BIR/TRAIN law brackets after applying
     // deduction
     public double finalWithholdingTax(double gross) {
-        if (gross <= 20832.00) {
+        if (gross <= 20833.00) {
             return 0.00;
         }
-        // Bracket 2: Over P20,832 to P33,333 -> 15% in excess of P20,832
+        // Bracket 2: Over P20,833 to P33,333 -> 15% in excess of P20,833
         else if (gross <= 33333.00) {
-            return (gross - 20832.00) * 0.15;
+            return (gross - 20833.00) * 0.15;
         }
         // Bracket 3: Over P33,333 to P66,667 -> P1,875 + 20% in excess of P33,333
         else if (gross <= 66667.00) {
@@ -91,12 +81,12 @@ public class PayrollCalculator {
         }
         // Bracket 5: Over P166,667 to P666,667 -> P33,541.80 + 30% in excess of
         // P166,667
-        else if (gross <= 666670.00) {
+        else if (gross <= 666667.00) {
             return 33541.80 + ((gross - 166667.00) * 0.30);
         }
         // Bracket 6: Over P666,667 -> P183,541.80 + 35% in excess of P666,667
         else {
-            return 183541.80 + ((gross - 666670.00) * 0.35);
+            return 183541.80 + ((gross - 666667.00) * 0.35);
         }
     }
 
@@ -117,10 +107,13 @@ public class PayrollCalculator {
             throw new IllegalArgumentException("Employee data is required.");
         }
         double gross = finalGross(empNo);
-        return finalSSS(gross)
-                + finalPhilHealth(gross)
-                + finalPagIbig(gross)
-                + finalWithholdingTax(gross);
+        double sss = finalSSS(gross);
+        double philHealth = finalPhilHealth(gross);
+        double pagIbig = finalPagIbig(gross);
+        return sss
+                + philHealth
+                + pagIbig
+                + finalWithholdingTax(Math.max(0, gross - sss - philHealth - pagIbig));
     }
 
     // Specific Summary: Targets one specific deduction type.
@@ -148,7 +141,8 @@ public class PayrollCalculator {
             case "withholdingtax":
             case "tax":
             case "withholding":
-                return finalWithholdingTax(gross);
+                return finalWithholdingTax(Math.max(0,
+                        gross - finalSSS(gross) - finalPhilHealth(gross) - finalPagIbig(gross)));
             case "total":
             case "all":
             case "statutory":

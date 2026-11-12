@@ -1,5 +1,7 @@
 package payrollhub.service;
 
+import java.time.LocalDate;
+
 public record PayslipData(
         int empNo,
         String employeeName,
@@ -11,6 +13,8 @@ public record PayslipData(
         double monthlyRate,
         double hourlyRate,
         double grossIncome,
+        double overtimeHours,
+        double overtimePay,
         double riceSubsidy,
         double phoneAllowance,
         double clothingAllowance,
@@ -20,5 +24,7 @@ public record PayslipData(
         double pagIbig,
         double withholdingTax,
         double totalDeductions,
-        double takeHomePay) {
+        double takeHomePay,
+        LocalDate cutoffStart,
+        LocalDate cutoffEnd) {
 }

@@ -2,6 +2,7 @@ package payrollhub.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -18,12 +19,16 @@ import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
@@ -119,16 +124,29 @@ public class GUILeaveManager extends JPanel {
         bottom.setOpaque(false);
         bottom.add(summaryLabel, BorderLayout.WEST);
         if (NavAccess.canDecideLeave(role)) {
-            JButton approve = GUIUtility.createActionButton("Approve", new Color(0x1E7A46));
-            JButton reject = GUIUtility.createActionButton("Reject", GUIUtility.BRAND_RED);
-            approve.addActionListener(event -> decide(LeaveData.APPROVED));
-            reject.addActionListener(event -> decide(LeaveData.REJECTED));
-            JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-            buttons.setOpaque(false);
-            buttons.add(approve);
-            buttons.add(reject);
-            bottom.add(buttons, BorderLayout.EAST);
+            JButton review = GUIUtility.createActionButton("Review", GUIUtility.INK_DARK);
+            review.addActionListener(event -> reviewSelected());
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+            actions.setOpaque(false);
+            actions.add(review);
+            bottom.add(actions, BorderLayout.EAST);
         }
+
+        table.getInputMap().put(javax.swing.KeyStroke.getKeyStroke("ENTER"), "reviewLeave");
+        table.getActionMap().put("reviewLeave", new javax.swing.AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                reviewSelected();
+            }
+        });
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent event) {
+                if (event.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(event)) {
+                    reviewSelected();
+                }
+            }
+        });
 
         add(top, BorderLayout.NORTH);
         add(GUIUtility.wrapTable(table), BorderLayout.CENTER);
@@ -200,10 +218,7 @@ public class GUILeaveManager extends JPanel {
 
     // ---------------------- Actions ----------------------
 
-    private void decide(String newStatus) {
-        if (!NavAccess.canDecideLeave(role)) {
-            return; // the buttons only exist for approvers; this guards direct calls
-        }
+    private void reviewSelected() {
         int row = table.getSelectedRow();
         if (row < 0) {
             JOptionPane.showMessageDialog(this, "Select a request first.", "Leave Management",
@@ -220,20 +235,70 @@ public class GUILeaveManager extends JPanel {
         if (leave == null) {
             return;
         }
-        if (!leave.isPending()) {
-            JOptionPane.showMessageDialog(this,
-                    "That request is already " + leave.getStatus().toLowerCase(Locale.ROOT) + ".",
-                    "Leave Management", JOptionPane.INFORMATION_MESSAGE);
-            return;
+        showReview(leave);
+    }
+
+    private void showReview(LeaveData leave) {
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this),
+                "Review Leave Request " + leave.getLeaveId(), Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        JPanel details = new JPanel(new java.awt.GridLayout(0, 2, 12, 10));
+        details.setBorder(BorderFactory.createEmptyBorder(20, 20, 12, 20));
+        addDetail(details, "Request ID", leave.getLeaveId());
+        addDetail(details, "Employee", names.getOrDefault(leave.getEmpNo(), String.valueOf(leave.getEmpNo())));
+        addDetail(details, "Leave type", leave.getType());
+        addDetail(details, "Start date", leave.getStartDate().format(DATE));
+        addDetail(details, "End date", leave.getEndDate().format(DATE));
+        addDetail(details, "Status", capitalize(leave.getStatus()));
+
+        JTextArea reason = new JTextArea(leave.getReason().isBlank() ? "No reason provided." : leave.getReason());
+        reason.setEditable(false);
+        reason.setLineWrap(true);
+        reason.setWrapStyleWord(true);
+        reason.setBackground(java.awt.Color.WHITE);
+        reason.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        JPanel reasonPanel = new JPanel(new BorderLayout(0, 6));
+        reasonPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 12, 20));
+        reasonPanel.add(new JLabel("Reason"), BorderLayout.NORTH);
+        reasonPanel.add(new JScrollPane(reason), BorderLayout.CENTER);
+
+        JButton close = GUIUtility.createActionButton("Close", GUIUtility.INK_DARK);
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        if (NavAccess.canDecideLeave(role) && leave.isPending() && leave.getEmpNo() != empNo) {
+            JButton approve = GUIUtility.createActionButton("Approve", new Color(0x1E7A46));
+            JButton reject = GUIUtility.createActionButton("Reject", GUIUtility.BRAND_RED);
+            approve.addActionListener(event -> decide(leave, LeaveData.APPROVED, dialog));
+            reject.addActionListener(event -> decide(leave, LeaveData.REJECTED, dialog));
+            buttons.add(approve);
+            buttons.add(reject);
         }
-        if (leave.getEmpNo() == empNo) {
-            JOptionPane.showMessageDialog(this, "You cannot decide your own leave request.",
-                    "Leave Management", JOptionPane.WARNING_MESSAGE);
+        close.addActionListener(event -> dialog.dispose());
+        buttons.add(close);
+
+        JPanel content = new JPanel(new BorderLayout());
+        content.add(details, BorderLayout.NORTH);
+        content.add(reasonPanel, BorderLayout.CENTER);
+        content.add(buttons, BorderLayout.SOUTH);
+        dialog.setContentPane(content);
+        dialog.setSize(520, 390);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+    private static void addDetail(JPanel details, String label, String value) {
+        details.add(new JLabel(label));
+        details.add(new JLabel(value));
+    }
+
+    private void decide(LeaveData leave, String newStatus, JDialog dialog) {
+        if (!NavAccess.canDecideLeave(role) || !leave.isPending() || leave.getEmpNo() == empNo) {
             return;
         }
         try {
             CsvHandler.updateLeaveStatus(leave.getLeaveId(), newStatus);
             reload();
+            dialog.dispose();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Could not save the decision: " + e.getMessage(),
                     "Leave Management", JOptionPane.ERROR_MESSAGE);

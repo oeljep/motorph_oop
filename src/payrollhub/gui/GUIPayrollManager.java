@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,7 @@ import payrollhub.data.CsvHandler;
 import payrollhub.data.EmployeeData;
 import payrollhub.service.PayslipCalculator;
 import payrollhub.service.PayslipData;
+import payrollhub.service.PayrollCutoff;
 
 /**
  * Payroll Manager tab (Accounting roles): payroll for every employee in a
@@ -43,7 +45,7 @@ import payrollhub.service.PayslipData;
 public class GUIPayrollManager extends JPanel {
 
     private static final String[] COLUMNS = { "Emp #", "Name", "Position", "Days", "Hours",
-            "Gross", "Benefits", "Deductions", "Net pay" };
+            "OT Hours", "OT Pay", "Gross", "Benefits", "Deductions", "Net pay", "Cutoff" };
 
     private final DefaultTableModel model = new DefaultTableModel(COLUMNS, 0) {
         @Override
@@ -53,11 +55,15 @@ public class GUIPayrollManager extends JPanel {
 
         @Override
         public Class<?> getColumnClass(int column) {
-            return column == 0 || column == 3 ? Integer.class : column >= 4 ? Double.class : String.class;
+            if (column == 0 || column == 3) {
+                return Integer.class;
+            }
+            return column >= 4 && column <= 10 ? Double.class : String.class;
         }
     };
     private final JTable table = new JTable(model);
     private final JComboBox<String> monthBox = new JComboBox<>();
+    private final JComboBox<PayrollCutoff> cutoffBox = new JComboBox<>(PayrollCutoff.values());
     private final JTextField searchField = GUIUtility.createTextField(16);
     private final JLabel totalsLabel = new JLabel(" ");
     private final List<PayslipData> slips = new ArrayList<>();
@@ -87,7 +93,7 @@ public class GUIPayrollManager extends JPanel {
         table.getColumnModel().getColumn(1).setPreferredWidth(190);
         table.getColumnModel().getColumn(2).setPreferredWidth(190);
         table.getColumnModel().getColumn(3).setMaxWidth(70);
-        for (int col = 5; col <= 8; col++) {
+        for (int col = 6; col <= 10; col++) {
             table.getColumnModel().getColumn(col).setCellRenderer(money);
         }
         DefaultTableCellRenderer hours = new DefaultTableCellRenderer() {
@@ -98,6 +104,7 @@ public class GUIPayrollManager extends JPanel {
             }
         };
         table.getColumnModel().getColumn(4).setCellRenderer(hours);
+        table.getColumnModel().getColumn(5).setCellRenderer(hours);
 
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             private void apply() {
@@ -131,11 +138,18 @@ public class GUIPayrollManager extends JPanel {
                 loadPayroll();
             }
         });
+        cutoffBox.addActionListener(event -> {
+            if (!loading) {
+                loadPayroll();
+            }
+        });
 
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         controls.setOpaque(false);
         controls.add(new JLabel("Pay month"));
         controls.add(monthBox);
+        controls.add(new JLabel("Cutoff"));
+        controls.add(cutoffBox);
         controls.add(new JLabel("Search"));
         controls.add(searchField);
         controls.add(view);
@@ -182,16 +196,18 @@ public class GUIPayrollManager extends JPanel {
         model.setRowCount(0);
         slips.clear();
         String period = (String) monthBox.getSelectedItem();
-        if (period == null) {
+        PayrollCutoff cutoff = (PayrollCutoff) cutoffBox.getSelectedItem();
+        if (period == null || cutoff == null) {
             totalsLabel.setText("No attendance records yet.");
             return;
         }
         try {
+            YearMonth month = YearMonth.parse(period);
             double gross = 0;
             double net = 0;
             for (EmployeeData e : CsvHandler.loadEmployees()) {
                 PayslipData s = PayslipCalculator.compute(e,
-                        CsvHandler.loadAttendance(e.getEmpNo(), period), period);
+                        CsvHandler.loadAttendance(e.getEmpNo(), period), month, cutoff);
                 if (s.daysWorked() == 0) {
                     continue;
                 }
@@ -199,10 +215,12 @@ public class GUIPayrollManager extends JPanel {
                 gross += s.grossIncome();
                 net += s.takeHomePay();
                 model.addRow(new Object[] { s.empNo(), s.employeeName(), s.position(), s.daysWorked(),
-                        s.hoursWorked(), s.grossIncome(), s.benefitsTotal(), s.totalDeductions(), s.takeHomePay() });
+                        s.hoursWorked(), s.overtimeHours(), s.overtimePay(), s.grossIncome(), s.benefitsTotal(),
+                        s.totalDeductions(), s.takeHomePay(), s.cutoffStart() + " to " + s.cutoffEnd() });
             }
-            totalsLabel.setText(String.format("Employees paid: %d     Total gross: %s     Total net: %s",
-                    slips.size(), GUIUtility.formatPeso(gross), GUIUtility.formatPeso(net)));
+            totalsLabel.setText(String.format("%s to %s     Employees paid: %d     Total gross: %s     Total net: %s",
+                    cutoff.startDate(month), cutoff.endDate(month), slips.size(),
+                    GUIUtility.formatPeso(gross), GUIUtility.formatPeso(net)));
         } catch (IOException e) {
             totalsLabel.setText("Could not read data: " + e.getMessage());
         }
@@ -244,7 +262,9 @@ public class GUIPayrollManager extends JPanel {
             return;
         }
         JFileChooser chooser = new JFileChooser();
-        chooser.setSelectedFile(new java.io.File("payroll-" + monthBox.getSelectedItem() + ".csv"));
+        PayrollCutoff cutoff = (PayrollCutoff) cutoffBox.getSelectedItem();
+        chooser.setSelectedFile(new java.io.File("payroll-" + monthBox.getSelectedItem()
+                + "-" + cutoff + ".csv"));
         if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -252,10 +272,13 @@ public class GUIPayrollManager extends JPanel {
         for (PayslipData s : slips) {
             rows.add(new String[] { String.valueOf(s.empNo()), s.employeeName(), s.position(),
                     String.valueOf(s.daysWorked()), String.format(Locale.US, "%.2f", s.hoursWorked()),
+                    String.format(Locale.US, "%.2f", s.overtimeHours()),
+                    String.format(Locale.US, "%.2f", s.overtimePay()),
                     String.format(Locale.US, "%.2f", s.grossIncome()),
                     String.format(Locale.US, "%.2f", s.benefitsTotal()),
                     String.format(Locale.US, "%.2f", s.totalDeductions()),
-                    String.format(Locale.US, "%.2f", s.takeHomePay()) });
+                    String.format(Locale.US, "%.2f", s.takeHomePay()),
+                    s.cutoffStart() + " to " + s.cutoffEnd() });
         }
         try {
             CsvHandler.writeAll(Paths.get(chooser.getSelectedFile().getPath()), COLUMNS, rows);

@@ -94,7 +94,7 @@ public final class NavAccess {
 
     public static boolean canAddOrDeleteEmployee(String role) {
         String normalized = normalize(role);
-        return normalized.equals("admin");
+        return normalized.equals("humanresources");
     }
 
     public static boolean canEditEmployee(String role) {

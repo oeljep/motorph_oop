@@ -35,17 +35,20 @@ import payrollhub.data.EmployeeData;
 import payrollhub.data.TicketData;
 
 /**
- * Ticket Manager tab: tickets employees filed (for example from the Payslip
- * tab). Staff open a ticket, add a reply, and mark it resolved or rejected.
+ * Shared manager screen for payslip concerns. Dispute Manager displays D
+ * identifiers, while Ticket Manager displays the stored T identifiers.
  */
 public class GUIDisputeManager extends JPanel {
 
-    private static final String[] COLUMNS = { "Ticket ID", "Employee", "Subject", "Date",
+    private static final String[] COLUMNS = { "Ticket No.", "Employee", "Subject", "Date",
+            "Processed by", "Status", "Remarks" };
+    private static final String[] DISPUTE_COLUMNS = { "Dispute No.", "Employee", "Subject", "Date",
             "Processed by", "Status", "Remarks" };
     private static final String[] FILTERS = { "All", TicketData.OPEN, TicketData.IN_PROGRESS,
             TicketData.RESOLVED, TicketData.REJECTED };
 
     private final int empNo;
+    private final boolean disputeView;
     private final Map<Integer, String> names = new HashMap<>();
     private List<TicketData> tickets = new ArrayList<>();
     private final DefaultTableModel model = new DefaultTableModel(COLUMNS, 0) {
@@ -63,7 +66,15 @@ public class GUIDisputeManager extends JPanel {
      * @param empNo the signed-in staff member's employee number
      */
     public GUIDisputeManager(int empNo) {
+        this(empNo, true);
+    }
+
+    protected GUIDisputeManager(int empNo, boolean disputeView) {
         this.empNo = empNo;
+        this.disputeView = disputeView;
+        if (disputeView) {
+            model.setColumnIdentifiers(DISPUTE_COLUMNS);
+        }
         setBackground(GUIUtility.PAGE_BACKGROUND);
         setLayout(new BorderLayout(0, GUIUtility.scale(20)));
         setBorder(BorderFactory.createEmptyBorder(
@@ -90,7 +101,8 @@ public class GUIDisputeManager extends JPanel {
         searchField.getDocument().addDocumentListener(listener);
         statusBox.addActionListener(event -> applyFilter());
 
-        JButton open = GUIUtility.createActionButton("Open ticket", GUIUtility.BRAND_RED);
+        JButton open = GUIUtility.createActionButton(disputeView ? "Open dispute" : "Open ticket",
+                GUIUtility.BRAND_RED);
         open.addActionListener(event -> openSelected());
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         controls.setOpaque(false);
@@ -101,7 +113,8 @@ public class GUIDisputeManager extends JPanel {
 
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
-        top.add(GUIUtility.createPageTitle("Ticket Manager"), BorderLayout.WEST);
+        top.add(GUIUtility.createPageTitle(disputeView ? "Dispute Manager" : "Ticket Manager"),
+                BorderLayout.WEST);
         top.add(controls, BorderLayout.EAST);
         add(top, BorderLayout.NORTH);
         add(GUIUtility.wrapTable(table), BorderLayout.CENTER);
@@ -133,7 +146,7 @@ public class GUIDisputeManager extends JPanel {
                     .thenComparing(TicketData::getTicketId, Comparator.reverseOrder()));
             for (TicketData t : tickets) {
                 String remarks = t.getRemarks().replace("\\n", " | ");
-                model.addRow(new Object[] { t.getTicketId(),
+                model.addRow(new Object[] { displayId(t),
                         names.getOrDefault(t.getEmpNo(), String.valueOf(t.getEmpNo())), t.getSubject(),
                         t.getCreatedDate(), t.getProcessedBy(), t.getStatus(), remarks });
             }
@@ -146,13 +159,14 @@ public class GUIDisputeManager extends JPanel {
     private void openSelected() {
         int row = table.getSelectedRow();
         if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Select a ticket first.", "Tickets",
+            String recordType = disputeView ? "dispute" : "ticket";
+            JOptionPane.showMessageDialog(this, "Select a " + recordType + " first.", "Tickets",
                     JOptionPane.INFORMATION_MESSAGE);
             return;
         }
         String id = (String) model.getValueAt(table.convertRowIndexToModel(row), 0);
         for (TicketData t : tickets) {
-            if (t.getTicketId().equals(id)) {
+            if (displayId(t).equals(id)) {
                 showTicket(t);
                 return;
             }
@@ -160,8 +174,9 @@ public class GUIDisputeManager extends JPanel {
     }
 
     private void showTicket(TicketData ticket) {
-        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Ticket " + ticket.getTicketId(),
-                Dialog.ModalityType.APPLICATION_MODAL);
+        String recordType = disputeView ? "Dispute " : "Ticket ";
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this),
+                recordType + displayId(ticket), Dialog.ModalityType.APPLICATION_MODAL);
         String who = names.getOrDefault(ticket.getEmpNo(), String.valueOf(ticket.getEmpNo()));
 
         JLabel header = new JLabel("<html><b>" + escape(ticket.getSubject()) + "</b><br>From " + escape(who)
@@ -250,6 +265,10 @@ public class GUIDisputeManager extends JPanel {
 
     private String staffName() {
         return names.getOrDefault(empNo, String.valueOf(empNo));
+    }
+
+    private String displayId(TicketData ticket) {
+        return disputeView ? ticket.getDisputeId() : ticket.getTicketId();
     }
 
     private static JPanel bubble(String author, String text, boolean right) {

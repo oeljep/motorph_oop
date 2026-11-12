@@ -1,14 +1,11 @@
-package payrollhub.gui;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+package payrollhub.test;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
+import payrollhub.gui.NavAccess;
+import payrollhub.gui.NavTab;
 
 class NavAccessTest {
 
@@ -18,7 +15,17 @@ class NavAccessTest {
             NavTab.SCHEDULE,
             NavTab.PAYSLIP);
 
-    @Test
+    private NavAccessTest() {
+    }
+
+    public static void main(String[] args) {
+        NavAccessTest test = new NavAccessTest();
+        test.matchesEveryRoleInTheAccessMatrix();
+        test.nullEmptyAndUnknownRolesReceiveOnlyRegularTabs();
+        test.trimsRoleAndMatchesItWithoutCaseSensitivity();
+        System.out.println("NavAccess checks passed.");
+    }
+
     void matchesEveryRoleInTheAccessMatrix() {
         Map<String, List<NavTab>> expectedByRole = new LinkedHashMap<>();
         expectedByRole.put("Regular", REGULAR_TABS);
@@ -48,7 +55,6 @@ class NavAccessTest {
         }
     }
 
-    @Test
     void nullEmptyAndUnknownRolesReceiveOnlyRegularTabs() {
         assertEquals(REGULAR_TABS, NavAccess.tabsFor(null));
         assertEquals(REGULAR_TABS, NavAccess.tabsFor(""));
@@ -59,13 +65,35 @@ class NavAccessTest {
         assertFalse(NavAccess.isManagement(""));
     }
 
-    @Test
     void trimsRoleAndMatchesItWithoutCaseSensitivity() {
         assertEquals(NavAccess.tabsFor("Admin"), NavAccess.tabsFor("  admin  "));
         assertTrue(NavAccess.canOpen("Admin", NavTab.EMPLOYEE_MANAGER));
         assertFalse(NavAccess.canOpen("Admin", NavTab.DISPUTE_MANAGER));
         assertTrue(NavAccess.canOpen("Admin", NavTab.LEAVE_MANAGER));
         assertTrue(NavAccess.canDecideLeave("Admin"));
+        assertFalse(NavAccess.canDecideLeave("HumanResources"));
+    }
+
+    private static void assertEquals(Object expected, Object actual, String message) {
+        if (!java.util.Objects.equals(expected, actual)) {
+            throw new AssertionError(message + ": expected <" + expected + "> but was <" + actual + ">");
+        }
+    }
+
+    private static void assertEquals(Object expected, Object actual) {
+        assertEquals(expected, actual, "values differ");
+    }
+
+    private static void assertTrue(boolean condition) {
+        if (!condition) {
+            throw new AssertionError("expected condition to be true");
+        }
+    }
+
+    private static void assertFalse(boolean condition) {
+        if (condition) {
+            throw new AssertionError("expected condition to be false");
+        }
     }
 
     private static boolean isManagementTab(NavTab tab) {

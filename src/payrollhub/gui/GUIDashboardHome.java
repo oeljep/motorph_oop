@@ -60,6 +60,9 @@ public class GUIDashboardHome extends JPanel {
 
     private void buildManagementView() throws IOException {
         List<EmployeeData> employees = CsvHandler.loadEmployees();
+        List<EmployeeData> visibleEmployees = NavAccess.canOpen(role, NavTab.EMPLOYEE_MANAGER)
+                ? CsvHandler.findDirectReports(empNo)
+                : employees;
 
         double payroll = 0;
         int regular = 0;
@@ -89,7 +92,7 @@ public class GUIDashboardHome extends JPanel {
         top.add(cards, BorderLayout.CENTER);
 
         add(top, BorderLayout.NORTH);
-        add(createEmployeeTable(employees), BorderLayout.CENTER);
+        add(createEmployeeTable(visibleEmployees), BorderLayout.CENTER);
     }
 
     private JPanel createEmployeeTable(List<EmployeeData> employees) {

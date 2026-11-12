@@ -5,6 +5,7 @@ Payroll Hub is a Java 17 Swing payroll application for MotorPH. The GUI is conne
 > **MO-IT110 Object-Oriented Programming · Milestone 2**
 >
 > Mapúa-Malayan Digital College · Section S2101
+> Rowel Jepsani
 
 ## Current implementation status
 
@@ -15,12 +16,12 @@ Payroll Hub is a Java 17 Swing payroll application for MotorPH. The GUI is conne
 | Employee records | Implemented. Search, view, add, edit, and delete screens use `CsvHandler`; add/delete and edit controls vary by role. |
 | Time tracker | Implemented. Employees can clock in/out and review their own attendance history. `AttendanceService` writes records; `AttendanceRules` supplies late-minute and paid-hour calculations. |
 | Leave requests | Implemented. Users can file and view requests; authorized Admin roles can view and decide leave requests for their direct reports only. Data is persisted in `leaves.csv`. |
-| Payslip and payroll screens | Connected to employee and attendance data. The payroll calculation rules and attendance/pay assumptions still require review against the course/source payroll policy before treating the output as production-verified. |
+| Payslip and payroll screens | Connected to employee and attendance data with first-half (1–15) and second-half (16–month-end) cutoffs. Basic pay and allowances recalculate by completed days worked ÷ 21. Recorded hours above 8 paid hours per day automatically earn overtime at 1.25× the hourly rate, without supervisor approval; overtime is included in cutoff gross and deductions. Confirm overtime and statutory payroll rules against the authoritative course/source policy before treating the output as production-verified. |
 | Ticket manager | Implemented in the GUI/data layer. Tickets are persisted to `src/data/tickets.csv`, created on first filing; replies and status updates are saved. |
 | Password recovery | Implemented through the login recovery flow and `UserService`. It is not an IT staff dashboard. |
-| IT operations and overtime approval | Not currently available as dashboard workflows. Overtime is shown as requiring supervisor approval; no approval action is implemented. |
+| IT operations | Not currently available as a dashboard workflow. Overtime is calculated automatically from completed attendance records and does not require supervisor approval. |
 
-The current source was verified with a Java 17 compile and the read-only `GuiBackendIntegrationTest`. The existing legacy test mains still contain failures in employee-data assertions and payroll rule expectations; those are not represented as passing. Maven was unavailable in the validation environment, so `mvn test` was not run.
+The current source was verified with a Java 17 compile, `GuiBackendIntegrationTest`, `NavAccessTest`, and `PayrollCalculatorTest` (40 passed, 8 employee-adapter checks skipped). `DataLayerTest` still reports 7 failures in employee-data expectations; those are not represented as passing. Maven was unavailable in the validation environment, so `mvn test` was not run.
 
 ## Features
 
@@ -30,6 +31,8 @@ The current source was verified with a Java 17 compile and the read-only `GuiBac
 - Employee self-service clock in/out and monthly attendance history.
 - Leave filing, calendar display, and direct-report-scoped approval/rejection for Admin only.
 - Employee payslip display and accounting payroll table/export.
+- Half-month payroll cutoff selection shared by Payroll Manager and Employee Payslip.
+- Automatic overtime hours and pay from completed attendance, included in payslip gross and cutoff deductions.
 - Ticket filing from payslip concerns and ticket response/status handling.
 - Password recovery using account and employee identity details.
 
@@ -78,13 +81,19 @@ All application records are stored in CSV files under `src/data/`, relative to t
 
 See the [data dictionary](./src/docs/data-dictionary.md) for field formats and constraints.
 
-## Getting started
 
-### Prerequisites
+## Login credentials
 
-- JDK 17 or later
-- Maven, if using the command line or VS Code Maven launch
-- Apache NetBeans 22 or later is optional
+Login credentials that was pulled from 'users.csv' from each role.
+Password is: Motorph123
+
+| Role in `users.csv` | username |
+|---|---|
+| `Admin` | 'biancaa' or 'christianm' |
+| `HumanResources` | 'rosiea' or 'andreav' |
+| `Accounting` | 'leilam' or 'anthonys' |
+| `Regular` | 'lizethv' or 'vellas' |
+| `InfoTech` | 'eduardh' |
 
 ## Design decisions and limitations
 
@@ -93,8 +102,6 @@ See the [data dictionary](./src/docs/data-dictionary.md) for field formats and c
 - **Role checks:** Navigation and UI actions use centralized role checks in `NavAccess`.
 - **Payroll validation:** Existing payroll methods and current payslip output need reconciliation with the authoritative MotorPH/course policy. Existing payroll tests currently report failures; confirm the rules before relying on figures.
 - **Credential storage:** `users.csv` currently stores passwords as plaintext. This is a known security limitation; do not use real credentials.
-
-## Rowel Jepsani
 
 ## Academic notice
 
