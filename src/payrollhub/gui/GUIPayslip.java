@@ -30,6 +30,7 @@ import payrollhub.data.CsvHandler;
 import payrollhub.data.EmployeeData;
 import payrollhub.data.TicketData;
 import payrollhub.service.PayslipCalculator;
+import payrollhub.service.PayrollCutoff;
 import payrollhub.service.PayslipData;
 
 /**
@@ -49,6 +50,7 @@ public class GUIPayslip extends JPanel {
 
     private final int empNo;
     private final JComboBox<String> monthBox = new JComboBox<>();
+    private final JComboBox<PayrollCutoff> cutoffBox = new JComboBox<>(PayrollCutoff.values());
     private final JPanel paperHolder = new JPanel(new BorderLayout());
     private final JButton reportButton = GUIUtility.createActionButton("Report an issue", GUIUtility.INK_DARK);
     private EmployeeData employee;
@@ -92,6 +94,11 @@ public class GUIPayslip extends JPanel {
                 showPayslip();
             }
         });
+        cutoffBox.addActionListener(event -> {
+            if (!loadingMonths) {
+                showPayslip();
+            }
+        });
         reportButton.addActionListener(event -> reportIssue());
         loadMonths();
     }
@@ -101,11 +108,15 @@ public class GUIPayslip extends JPanel {
     private JPanel createTopBar() {
         JLabel monthLabel = new JLabel("Pay month");
         monthLabel.setFont(GUIUtility.bodyFont(Font.PLAIN, 14f));
+        JLabel cutoffLabel = new JLabel("Cutoff");
+        cutoffLabel.setFont(GUIUtility.bodyFont(Font.PLAIN, 14f));
 
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         controls.setOpaque(false);
         controls.add(monthLabel);
         controls.add(monthBox);
+        controls.add(cutoffLabel);
+        controls.add(cutoffBox);
         controls.add(reportButton);
 
         JPanel bar = new JPanel(new BorderLayout());
@@ -152,7 +163,8 @@ public class GUIPayslip extends JPanel {
         }
         try {
             List<AttendanceData> records = CsvHandler.loadAttendance(empNo, period);
-            PayslipData slip = PayslipCalculator.compute(employee, records, period);
+            PayslipData slip = PayslipCalculator.compute(employee, records,
+                    YearMonth.parse(period), (PayrollCutoff) cutoffBox.getSelectedItem());
             paperHolder.removeAll();
             paperHolder.add(createPaper(slip), BorderLayout.CENTER);
             paperHolder.revalidate();
@@ -175,7 +187,7 @@ public class GUIPayslip extends JPanel {
     // ---------------------- Report an issue ----------------------
 
     private void reportIssue() {
-        String period = (String) monthBox.getSelectedItem();
+        String period = selectedCutoffLabel();
         JTextField subject = new JTextField("Payslip concern - " + period, 30);
         JTextArea message = new JTextArea(5, 30);
         message.setLineWrap(true);
@@ -215,8 +227,6 @@ public class GUIPayslip extends JPanel {
      * @return a white panel ready to place in any container
      */
     public static JPanel createPaper(PayslipData slip) {
-        YearMonth ym = YearMonth.parse(slip.period());
-
         JPanel paper = new JPanel();
         paper.setLayout(new BoxLayout(paper, BoxLayout.Y_AXIS));
         paper.setBackground(Color.WHITE);
@@ -241,8 +251,9 @@ public class GUIPayslip extends JPanel {
         paper.add(title);
         paper.add(Box.createVerticalStrut(14));
 
-        paper.add(row("PAYSLIP NO", slip.empNo() + "-" + slip.period().replace("-", ""), false));
-        paper.add(row("PERIOD", ym.atDay(1) + " to " + ym.atEndOfMonth(), false));
+        paper.add(row("PAYSLIP NO", slip.empNo() + "-" + slip.cutoffStart().toString().replace("-", "")
+                + "-" + slip.cutoffEnd().toString().replace("-", ""), false));
+        paper.add(row("PERIOD", slip.cutoffStart() + " to " + slip.cutoffEnd(), false));
         paper.add(row("EMPLOYEE ID", String.valueOf(slip.empNo()), false));
         paper.add(row("EMPLOYEE NAME", slip.employeeName(), false));
         paper.add(row("POSITION", slip.position(), false));
@@ -253,7 +264,8 @@ public class GUIPayslip extends JPanel {
         paper.add(row("Days Worked", String.valueOf(slip.daysWorked()), false));
         paper.add(row("Hours Worked", String.format("%.2f", slip.hoursWorked()), false));
         paper.add(row("Late (minutes)", String.valueOf(slip.lateMinutes()), false));
-        paper.add(row("Overtime", "Needs supervisor approval", false));
+        paper.add(row("Overtime Hours", String.format("%.2f", slip.overtimeHours()), false));
+        paper.add(row("Overtime Pay (1.25x)", GUIUtility.formatPeso(slip.overtimePay()), false));
         paper.add(row("GROSS INCOME", GUIUtility.formatPeso(slip.grossIncome()), true));
 
         paper.add(heading("BENEFITS"));
@@ -281,6 +293,16 @@ public class GUIPayslip extends JPanel {
         paper.add(takeHome);
         paper.setPreferredSize(new Dimension(620, paper.getPreferredSize().height));
         return paper;
+    }
+
+    private String selectedCutoffLabel() {
+        String month = (String) monthBox.getSelectedItem();
+        PayrollCutoff cutoff = (PayrollCutoff) cutoffBox.getSelectedItem();
+        if (month == null || cutoff == null) {
+            return "selected cutoff";
+        }
+        YearMonth yearMonth = YearMonth.parse(month);
+        return cutoff.startDate(yearMonth) + " to " + cutoff.endDate(yearMonth);
     }
 
     private static JLabel small(String text) {

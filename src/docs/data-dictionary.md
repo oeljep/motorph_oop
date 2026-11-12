@@ -46,6 +46,32 @@ Removed from the source sheet (computed in `PayrollCalculator` or as `Employee` 
 - Gross semi-monthly rate = basic salary ÷ 2 (verify against source rows)
 - Hourly rate = basic salary ÷ 21 ÷ 8 (verify against source rows)
 
+## Payroll cutoff calculation
+
+Payroll Manager and Employee Payslip use the same two cutoff periods:
+
+| Cutoff | Included dates |
+|---|---|
+| First half | Day 1 through day 15 |
+| Second half | Day 16 through the last day of the selected month |
+
+For each cutoff, only completed attendance records inside the selected dates
+count as days worked. Basic pay and each monthly allowance are calculated as
+`monthly amount × days worked ÷ 21`. Statutory deductions are recalculated from
+the resulting cutoff gross (cutoff basic pay plus overtime pay and cutoff
+allowances), using the existing deduction tables. Overtime is the completed
+daily paid hours above 8, after subtracting the one-hour unpaid break, and is
+paid at 1.25 times the hourly rate (`monthly basic salary ÷ 168`). It is
+calculated directly from completed attendance and does not require supervisor
+approval. Withholding tax uses cutoff gross less the SSS, PhilHealth, and
+Pag-IBIG employee contributions. A cutoff with no completed attendance has
+zero pay, benefits, deductions, and take-home pay.
+
+These are the application's current configured assumptions; confirm overtime
+rates, statutory deduction frequency, and all payroll policy values against the
+authoritative MotorPH/course rules before treating payroll outputs as
+production-verified.
+
 ## attendance.csv (4 columns)
 
 | # | Column | Type | Required | Notes |

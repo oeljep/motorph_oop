@@ -60,8 +60,7 @@ public class Attendance {
     }
 
     public double getOvertimeHours() {
-        // Returns 0 when no overtime. Overtime needs supervisor approval in the process
-        // flow, so the approval check belongs to the caller.
+        // Overtime is calculated from recorded hours; it does not require supervisor approval.
         double totalHoursWorked = getTotalHoursWorked();
         double regularHours = 8.0; // Assuming 8 hours is the standard workday
         return Math.max(0, totalHoursWorked - regularHours);

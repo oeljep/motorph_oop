@@ -134,8 +134,8 @@ public class GUIEmployeeManager extends JPanel {
     private void reload() {
         model.setRowCount(0);
         try {
-            List<EmployeeData> all = CsvHandler.loadEmployees();
-            for (EmployeeData e : all) {
+            List<EmployeeData> directReports = CsvHandler.findDirectReports(empNo);
+            for (EmployeeData e : directReports) {
                 model.addRow(new Object[] { e.getEmpNo(), e.getLastName(), e.getFirstName(),
                         e.getPosition(), e.getStatus(), e.getSupervisor() });
             }

@@ -1,6 +1,9 @@
 package payrollhub.test;
 
+import java.time.LocalDate;
+
 import payrollhub.model.Employee;
+import payrollhub.model.HumanResources;
 import payrollhub.service.PayrollCalculator;
 
 /**
@@ -11,11 +14,6 @@ import payrollhub.service.PayrollCalculator;
  * java -cp bin payrollhub.service.PayrollCalculatorTest
  *
  * Exit code is 0 when everything passes and 1 when anything fails.
- *
- * ONE THING TO CONNECT: the tests that need an Employee object call
- * employee(...) in the ADAPTER section below. Fill that in with your own
- * Regular (or other Employee subclass) and those tests will run. Until then
- * they are reported as SKIP, not FAIL. All other tests run as-is.
  *
  * EXPECTED VALUES are written by hand from the statutory tables, not
  * computed by the code under test, so a wrong rule shows up as a FAIL.
@@ -48,14 +46,14 @@ public class PayrollCalculatorTest {
     private static final double PAGIBIG_CAP = 100.00;
 
     // =====================================================================
-    // ADAPTER: build an Employee for the tests that need one.
+    // Build an Employee fixture with only payroll data relevant to these tests.
     // =====================================================================
 
     private static Employee employee(double basic, double rice, double phone, double clothing) {
-        // Example (change to match your constructor):
-        // return new Regular("10001", "Cruz", "Ana", ..., basic, rice, phone,
-        // clothing);
-        throw new UnsupportedOperationException("adapter not connected: employee()");
+        return new HumanResources(10001, "Cruz", "Ana", "Test address", "09123456789",
+                LocalDate.of(1990, 1, 1), "Test Supervisor", "Regular", "Test Position",
+                "123456789", "123456789", "123456789", "123456789",
+                basic, rice, phone, clothing);
     }
 
     // =====================================================================
@@ -70,7 +68,6 @@ public class PayrollCalculatorTest {
 
     private static int passed = 0;
     private static int failed = 0;
-    private static int skipped = 0;
 
     private static final PayrollCalculator calc = new PayrollCalculator();
 
@@ -79,14 +76,6 @@ public class PayrollCalculatorTest {
             body.run();
             passed++;
             System.out.println("  PASS  " + name);
-        } catch (UnsupportedOperationException e) {
-            if (e.getMessage() != null && e.getMessage().startsWith("adapter not connected")) {
-                skipped++;
-                System.out.println("  SKIP  " + name + "  (" + e.getMessage() + ")");
-            } else {
-                failed++;
-                System.out.println("  FAIL  " + name + "\n          -> " + e);
-            }
         } catch (Throwable t) {
             failed++;
             System.out.println("  FAIL  " + name + "\n          -> " + t);
@@ -109,8 +98,6 @@ public class PayrollCalculatorTest {
             body.run();
         } catch (IllegalArgumentException expected) {
             return;
-        } catch (UnsupportedOperationException e) {
-            throw e; // lets the adapter SKIP logic see it
         } catch (Throwable t) {
             throw new AssertionError("expected IllegalArgumentException but got " + t);
         }
@@ -134,11 +121,11 @@ public class PayrollCalculatorTest {
         payAfterDeductionsTests();
         System.out.println("\nSweeps across many salaries");
         sweepTests();
-        System.out.println("\nEmployee-based methods (need the adapter)");
+        System.out.println("\nEmployee-based methods");
         employeeTests();
 
         System.out.println("\n----------------------------------------");
-        System.out.println("Passed: " + passed + "   Failed: " + failed + "   Skipped: " + skipped);
+        System.out.println("Passed: " + passed + "   Failed: " + failed);
         System.exit(failed == 0 ? 0 : 1);
     }
 

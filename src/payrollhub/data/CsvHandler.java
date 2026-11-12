@@ -354,6 +354,37 @@ public final class CsvHandler {
         return Optional.empty();
     }
 
+    /**
+     * Finds employees whose recorded supervisor is the specified employee.
+     *
+     * @param supervisorEmpNo employee number of the supervisor
+     * @return the supervisor's direct reports, or an empty list when there are none
+     * @throws IOException if employee data cannot be read or the supervisor does not exist
+     */
+    public static List<EmployeeData> findDirectReports(int supervisorEmpNo) throws IOException {
+        if (supervisorEmpNo <= 0) {
+            throw new IllegalArgumentException("Supervisor employee number must be positive.");
+        }
+
+        List<EmployeeData> employees = loadEmployees();
+        boolean supervisorExists = employees.stream()
+                .anyMatch(employee -> employee.getEmpNo() == supervisorEmpNo);
+        if (!supervisorExists) {
+            throw new IOException("Supervisor employee " + supervisorEmpNo + " was not found.");
+        }
+
+        List<EmployeeData> directReports = new ArrayList<>();
+        for (EmployeeData employee : employees) {
+            if (employee.getEmpNo() != supervisorEmpNo
+                    && findSupervisor(employee, employees)
+                            .map(supervisor -> supervisor.getEmpNo() == supervisorEmpNo)
+                            .orElse(false)) {
+                directReports.add(employee);
+            }
+        }
+        return directReports;
+    }
+
     private static String squash(String s) {
         return s == null ? "" : s.replaceAll("[^\\p{L}\\p{N}]", "").toLowerCase();
     }

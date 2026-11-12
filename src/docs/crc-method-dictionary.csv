@@ -140,13 +140,13 @@
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,PayrollCalculator,finalGross,Returns the gross pay by delegating to the employee’s own calculatePay(),public,Employee emp,double,Reads no fields directly. Polymorphism picks the right role formula.
-,PayrollCalculator,finalSSS,Determines the SSS deduction using the 2024/2025 statutory table.,public,double gross,double,"Logic Hiding: Contains the actual bracket logic (the 29,750 cap)."
-,PayrollCalculator,finalPhilHealth,Calculates the PhilHealth premium (currently 5% of basic salary).,public,double basic,double,Compliance: Implements the 50/50 employer-employee split logic.
-,PayrollCalculator,finalPagIBIG,Calculates the Pag-IBIG contribution.,public,double gross,double,Rule: Usually a fixed 100.00 or 2% capped at a certain amount.
+,PayrollCalculator,finalSSS,Determines the SSS deduction using the configured contribution brackets.,public,double gross,double,Uses floor-to-peso bracket matching; the configured employee contribution caps at 1,125 when gross reaches 24,750.
+,PayrollCalculator,finalPhilHealth,Calculates the employee half of the 3% PhilHealth premium.,public,double gross,double,Uses a 300 premium floor and 1,800 premium cap; returns zero when gross is zero or negative.
+,PayrollCalculator,finalPagIBIG,Calculates the Pag-IBIG contribution.,public,double gross,double,Returns zero below 1,000; applies 1% through 1,500 and 2% above with a 100 employee-share cap.
 ,PayrollCalculator,taxedNet,Computes withholding tax based on BIR/TRAIN law brackets.,public,double taxable,double,"Policy: Returns 0.0 if monthly taxable income ≤ 20,833."
 ,PayrollCalculator,payAfterDeductions,The Firewall logic: Subtracts all deductions from the gross salary.,public,"double gross, double deduct",double,"Safety: Ensures result is never <0 using Math.max(0, net)."
-,PayrollCalculator,sumDeductions,Full Summary: Aggregates all government deductions.,public,Employee emp,double,Overloading (1): Returns the total SSS + PhilHealth + PagIBIG + Tax.
-,PayrollCalculator,sumDeductions,Specific Summary: Targets one specific deduction type.,public,"Employee emp, String type",double,"Overloading (2): Returns only the requested type (""SSS"")."
+,PayrollCalculator,sumDeductions,Full Summary: Aggregates all government deductions.,public,Employee emp,double,Overloading (1): Returns SSS + PhilHealth + PagIBIG + withholding tax; tax base excludes the first three contributions.
+,PayrollCalculator,sumDeductions,Specific Summary: Targets one specific deduction type.,public,"Employee emp, String type",double,"Overloading (2): Returns the selected deduction; withholding tax uses gross less SSS PhilHealth and Pag-IBIG."
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,Main (start),start,The main entry point that boots the system and opens the Login screen.,public,none,void,Guard: Check if the CSV database is linked before proceeding.
@@ -259,7 +259,7 @@
 -timeOut must not be before timeIn"
 ,Attendance,getLateMinutes,Reports how many minutes the employee arrived after the allowed start.,public,none,int,"Computed by private logic, never supplied from outside. Assumption: start 08:00 with a 10-minute grace period (confirm against MotorPH policy). Returns 0 if on time."
 ,Attendance,getHoursWorked,"Reports hours worked for the day, used by payroll for gross pay.",public,none,double,Time between timeIn and timeOut less a one-hour unpaid break (assumption). Never negative.
-,Attendance,getOvertimeHours,Reports hours beyond the standard shift.,public,none,double,"Returns 0 when no overtime. Overtime needs supervisor approval in the process flow, so the approval check belongs to the caller."
+,Attendance,getOvertimeHours,Reports hours beyond the standard shift.,public,none,double,Calculates recorded paid hours beyond the 8-hour day; supervisor approval is not required.
 ,,,,,,,
 ,Class,Method Name,Purpose,Visibility,Parameters,Return Type,Validation Rule / Notes
 ,PeriodSummary,PeriodSummary,Creates an empty summary for one employee and one month.,public,"int empNo, int month, int year",Constructor,"-month must be 1 to 12
@@ -351,17 +351,20 @@
 ,GUIDashboard,showCard,Replaces and displays a named content card.,private,"String name, JPanel screen",void,Implemented. Removes the prior panel for that card then revalidates and shows the new panel.
 ,GUIDashboard,createPlaceholder,Builds a placeholder for a tab without a dedicated screen.,private,NavTab tab,JPanel,Displays a coming-soon message.
 ,GUIDashboardHome,GUIDashboardHome,Builds a role-specific dashboard overview.,public,"String role, int empNo",Constructor,Implemented. Management view is selected using NavAccess.isManagement; read failures are displayed on the panel.
-,GUIDashboardHome,buildManagementView,Displays company-level summary cards and employee table.,private,none,void,Implemented. Uses CsvHandler employee records and pending leave count; basic payroll excludes allowances.
+,GUIDashboardHome,buildManagementView,Displays company-level summary cards and a role-scoped employee table.,private,none,void,Implemented. Admin and HumanResources see only their direct reports in the employee table; summary cards remain company-wide. Basic payroll excludes allowances.
+,GUIEmployeeManager,reload,Loads the signed-in employee’s direct reports into the employee table.,private,none,void,Implemented. Uses CsvHandler.findDirectReports; reports are scoped to the current supervisor.
+,CsvHandler,findDirectReports,Finds employees whose recorded supervisor is the specified employee.,public static,int supervisorEmpNo,"List<EmployeeData>",Implemented. Resolves supervisor names against employee records and throws IOException if the supervisor does not exist.
 ,GUIDashboardHome,buildPersonalView,Displays the signed-in employee’s employment and personal summary cards.,private,none,void,Implemented. Loads employee-specific latest attendance month plus own pending leave count and compensation data.
 ,GUIDashboard,showProfile,Displays the signed-in employee profile.,private,none,void,Implemented. Reads employee data through GUIViewProfile and CsvHandler.
 ,GUIDashboard,logout,Returns to sign-in and closes the dashboard.,private,none,void,Implemented. Opens GUILogin and disposes the current frame.
 ,NavAccess,tabsFor,Returns dashboard tabs allowed for a role.,public static,String role,"List<NavTab>",Implemented. Unknown roles receive staff tabs only.
 ,NavAccess,canOpen,Checks whether a role may open a tab.,public static,"String role, NavTab tab",boolean,Implemented and used by sidebar and dashboard navigation.
 ,NavAccess,isManagement,Determines whether dashboard overview uses company-wide metrics.,public static,String role,boolean,True when the role can open an employee, payroll, or dispute management tab.
-,GUILeaveManager,GUILeaveManager,Builds the leave management screen for an approver's direct reports.,public,"String role, int empNo",Constructor,Implemented. Displays only direct reports' requests; approval controls are shown only to roles allowed by NavAccess.canDecideLeave.
+,GUILeaveManager,GUILeaveManager,Builds the leave management screen for an approver's direct reports.,public,"String role, int empNo",Constructor,Implemented. Displays only direct reports' requests; an authorized user opens Review to inspect the request before deciding.
 ,GUILeaveManager,reload,Loads and displays direct reports' leave requests with employee names and pending totals.,private,none,void,Implemented. Resolves direct reports through CsvHandler.findSupervisor and reads leave data through CsvHandler; reports read errors in the screen.
+,GUILeaveManager,showReview,Displays leave request details and authorized decision actions in a modal popup.,private,LeaveData leave,void,Approve and Reject are available only for pending requests and roles permitted by NavAccess.canDecideLeave.
 ,GUILeaveManager,applyFilter,Applies the text and status filters to the leave table.,private,none,void,Implemented. Filters table rows without changing stored leave data.
-,GUILeaveManager,decide,Approves or rejects a selected pending leave request.,private,String newStatus,void,Implemented. Rechecks role pending status and self-approval restriction before calling CsvHandler.updateLeaveStatus.
+,GUILeaveManager,decide,Approves or rejects a reviewed pending leave request.,private,"LeaveData leave, String newStatus, JDialog dialog",void,Implemented. Rechecks role pending status and self-approval restriction before calling CsvHandler.updateLeaveStatus; closes the popup after a successful save.
 ,NavAccess,canAddOrDeleteEmployee,Checks employee add/delete permission.,public static,String role,boolean,Implemented. Admin only; HumanResources is limited to Employee Manager.
 ,NavAccess,canEditEmployee,Checks employee edit permission.,public static,String role,boolean,Implemented. Admin and HumanResources roles.
 ,NavAccess,canDecideLeave,Checks leave decision permission.,public static,String role,boolean,Implemented. Delegates to the admin and HumanResources permission check.
@@ -381,14 +384,15 @@
 ,GUIEmployees,deleteSelected,Deletes a selected employee and associated login.,private,none,void,Implemented. Requires add/delete permission confirmation and prevents self-deletion.
 ,GUIAddEmployee,save,Validates and saves an employee record.,private,none,void,Implemented. Adds employee and login or updates existing employee through CsvHandler.
 ,GUIViewProfile,GUIViewProfile,Loads and displays one employee profile.,public,int empNo,Constructor,Implemented. Reads employee data through CsvHandler and surfaces read failures.
-,GUIPayslip,showPayslip,Loads attendance and renders the selected employee payslip.,private,none,void,Implemented. Calls PayslipCalculator; payroll rules remain subject to policy and test verification.
+,GUIPayslip,showPayslip,Loads attendance and renders the selected employee payslip for the selected half-month cutoff.,private,none,void,Implemented. Calls PayslipCalculator with the selected month and cutoff so days worked pay benefits and deductions are recalculated together.
 ,GUIPayslip,reportIssue,Files a ticket for a payslip concern.,private,none,void,Implemented. Creates TicketData and persists it through CsvHandler.saveTicket.
-,GUIPayslip,createPaper,Builds a printable display panel for computed payslip data.,public static,PayslipData slip,JPanel,Implemented presentation helper. It does not calculate payroll.
-,GUIPayrollManager,loadPayroll,Calculates and displays payroll rows for a selected month.,private,none,void,Implemented wiring. Uses employee attendance CSV data and PayslipCalculator; financial correctness still requires payroll-policy verification.
+,TicketData,getDisputeId,Returns the dispute-facing identifier for the same persisted ticket.,public,none,String,Maps the T prefix to D while preserving the numeric suffix.
+,GUIPayslip,createPaper,Builds a printable display panel for computed payslip data.,public static,PayslipData slip,JPanel,Implemented presentation helper. Displays calculated overtime hours and pay; it does not calculate payroll.
+,GUIPayrollManager,loadPayroll,Calculates and displays payroll rows for the selected month and half-month cutoff.,private,none,void,Implemented wiring. Uses employee attendance CSV data and PayslipCalculator; displays overtime hours and pay and reloads all amounts when the cutoff changes.
 ,GUIPayrollManager,exportCsv,Exports the currently loaded payroll rows.,private,none,void,Implemented. Writes the selected rows through CsvHandler.writeAll.
-,GUITicketManager,reload,Loads ticket records and employee names.,private,none,void,Implemented. Reads through CsvHandler.loadTickets and CsvHandler.loadEmployees.
-,GUITicketManager,persist,Saves a ticket reply or status change and refreshes the list.,private,TicketData ticket,boolean,Implemented. Reports persistence errors and keeps the dialog open on failure.
-,GUITicketManager,showTicket,Displays a ticket conversation and actions.,private,TicketData ticket,void,Implemented. Replies and resolved/rejected status are persisted through CsvHandler.
+,GUIDisputeManager,reload,Loads shared dispute and ticket records and employee names.,private,none,void,Implemented. Reads through CsvHandler.loadTickets and CsvHandler.loadEmployees.
+,GUIDisputeManager,persist,Saves a reply or status change and refreshes the shared record list.,private,TicketData ticket,boolean,Implemented. Reports persistence errors and keeps the dialog open on failure.
+,GUIDisputeManager,showTicket,Displays a shared case conversation and actions.,private,TicketData ticket,void,Implemented. Dispute Manager shows the D identifier and Ticket Manager shows the T identifier; replies and status changes persist through CsvHandler.
 ,CsvHandler,loadAttendanceMonths,Lists the months with attendance for one employee.,public static,int empNo,"List<String>",Implemented. Validates row shape and attendance dates.
 ,CsvHandler,loadAttendance,Loads one employee’s attendance for a selected month.,public static,"int empNo, String period","List<AttendanceData>",Implemented. Period format is yyyy-MM; malformed rows raise IOException.
 ,CsvHandler,findAttendance,Finds attendance for one employee and date.,public static,"int empNo, LocalDate date","Optional<AttendanceData>",Implemented. Reads the employee’s month and returns the matching date if present.
@@ -409,8 +413,9 @@
 ,AttendanceService,recordTimeOut,Validates and records a check-out.,public,"int empNo, LocalDateTime timeOut",void,Implemented. Requires an open check-in and rejects an earlier or duplicate check-out.
 ,AttendanceService,loadForMonth,Loads domain attendance records for a month.,public,"int empNo, YearMonth month","List<Attendance>",Implemented service API. Current Swing screens read AttendanceData through CsvHandler.
 ,AttendanceRules,hoursWorked,Calculates paid hours from two attendance times.,public static,"LocalTime timeIn, LocalTime timeOut",double,Implemented. Subtracts the configured one-hour unpaid break.
+,AttendanceRules,overtimeHours,Calculates paid hours beyond the regular daily shift.,public static,"LocalTime timeIn, LocalTime timeOut",double,Implemented. Returns paid hours above 8 after subtracting the configured one-hour unpaid break; does not require supervisor approval.
 ,AttendanceRules,lateMinutes,Calculates late minutes after the configured grace period.,public static,LocalTime timeIn,int,Implemented. Uses an 08:00 shift start and ten-minute grace period.
-,PayslipCalculator,compute,Builds payroll values for an employee and attendance period.,public static,"EmployeeData employee, List<AttendanceData> attendance, String period",PayslipData,Implemented integration. Requires matching employee and yyyy-MM period; statutory rule accuracy remains to be verified.
-,Application,Java 17 compile and GUI backend integration check,Records the current technical validation result.,verification,none,Status,Passed on 2026-11-04. Maven test command was unavailable. Legacy data and payroll test mains still report failures and are not marked passing.
+,PayslipCalculator,compute,Builds cutoff payroll values for an employee and attendance in the selected month.,public static,"EmployeeData employee, List<AttendanceData> attendance, YearMonth month, PayrollCutoff cutoff",PayslipData,"Counts completed attendance inside the cutoff; prorates basic salary and allowances by daysWorked/21; adds automatic overtime pay (hours above 8 per day × hourly rate × 1.25) to cutoff gross before deductions. Zero attendance produces zero amounts."
+,Application,Java 17 compile and focused tests,Records the current technical validation result.,verification,none,Status,"Passed on 2026-11-13: GUI backend integration, NavAccess, and PayrollCalculator (40 passed, 8 employee-adapter checks skipped). Maven test command was unavailable."
 ,Application,Remote service or database integration,Records external backend availability.,status,none,Status,Not implemented. Current backend is local CSV storage under src/data.
 ,Application,Payroll policy and automated test reconciliation,Records remaining payroll verification work.,status,none,Status,Open. Existing payroll and employee-data test failures require investigation before payroll output is relied upon.

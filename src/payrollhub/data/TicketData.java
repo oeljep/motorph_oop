@@ -66,6 +66,10 @@ public final class TicketData {
         return ticketId;
     }
 
+    public String getDisputeId() {
+        return ticketId.startsWith("T") ? "D" + ticketId.substring(1) : ticketId;
+    }
+
     public int getEmpNo() {
         return empNo;
     }

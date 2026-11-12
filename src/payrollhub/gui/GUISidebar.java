@@ -48,7 +48,7 @@ public class GUISidebar extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(
                 GUIUtility.scale(21), GUIUtility.scale(21), GUIUtility.scale(21), GUIUtility.scale(21)));
-        setPreferredSize(new Dimension(GUIUtility.scale(276), 0));
+        setPreferredSize(new Dimension(GUIUtility.scale(306), 0));
 
         for (NavTab tab : NavAccess.tabsFor(role)) {
             NavButton button = new NavButton(tab);
@@ -103,7 +103,7 @@ public class GUISidebar extends JPanel {
             setForeground(GUIUtility.FIELD_TEXT);
             Dimension size = new Dimension(Integer.MAX_VALUE, BUTTON_HEIGHT);
             setMaximumSize(size);
-            setPreferredSize(new Dimension(GUIUtility.scale(238), BUTTON_HEIGHT));
+            setPreferredSize(new Dimension(GUIUtility.scale(268), BUTTON_HEIGHT));
         }
 
         void setActive(boolean active) {
@@ -129,9 +129,15 @@ public class GUISidebar extends JPanel {
             paintIcon(g2, tab, iconX, (getHeight() - iconSize) / 2, iconSize);
 
             g2.setColor(getForeground());
-            g2.setFont(getFont());
-            FontMetrics fm = g2.getFontMetrics();
             int textX = iconX + iconSize + GUIUtility.scale(14);
+            int textWidth = Math.max(0, getWidth() - textX - GUIUtility.scale(12));
+            Font labelFont = getFont();
+            while (labelFont.getSize2D() > GUIUtility.scale(14)
+                    && g2.getFontMetrics(labelFont).stringWidth(getText()) > textWidth) {
+                labelFont = labelFont.deriveFont(labelFont.getSize2D() - 0.5f);
+            }
+            g2.setFont(labelFont);
+            FontMetrics fm = g2.getFontMetrics();
             g2.drawString(getText(), textX, (getHeight() - fm.getHeight()) / 2 + fm.getAscent());
             g2.dispose();
         }
@@ -212,6 +218,23 @@ public class GUISidebar extends JPanel {
                         1f, new float[] { 2f, 2.5f }, 0f));
                 g2.draw(new Line2D.Double(15, 7, 15, 17));
                 break;
+            case TICKET_MANAGER: {
+                Path2D ticket = new Path2D.Double();
+                ticket.moveTo(4, 5);
+                ticket.lineTo(20, 5);
+                ticket.lineTo(20, 9);
+                ticket.curveTo(16, 9, 16, 15, 20, 15);
+                ticket.lineTo(20, 19);
+                ticket.lineTo(4, 19);
+                ticket.lineTo(4, 15);
+                ticket.curveTo(8, 15, 8, 9, 4, 9);
+                ticket.closePath();
+                g2.draw(ticket);
+                g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                        1f, new float[] { 1.5f, 2f }, 0f));
+                g2.draw(new Line2D.Double(12, 6, 12, 18));
+                break;
+            }
             default:
                 break;
         }
