@@ -98,7 +98,7 @@ public class PayrollCalculator {
         if (deduct < 0) {
             throw new IllegalArgumentException("Deductions cannot be negative.");
         }
-        return gross - deduct;
+        return Math.max(0, gross - deduct);
     }
 
     // Full Summary: Aggregates all government deductions.

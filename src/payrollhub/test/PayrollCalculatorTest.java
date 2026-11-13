@@ -267,6 +267,9 @@ public class PayrollCalculatorTest {
 
         test("deductions equal to gross give zero", () -> assertMoney(0.00, calc.payAfterDeductions(1000, 1000)));
 
+        test("deductions above gross do not produce negative net pay",
+                () -> assertMoney(0.00, calc.payAfterDeductions(1000, 1200)));
+
         test("negative gross is rejected", () -> assertThrowsIAE(() -> calc.payAfterDeductions(-1, 0)));
 
         test("negative deductions are rejected", () -> assertThrowsIAE(() -> calc.payAfterDeductions(1000, -1)));
