@@ -168,7 +168,7 @@ public class GUIEmployeeManager extends JPanel {
         }
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), e.getFullName(),
                 java.awt.Dialog.ModalityType.APPLICATION_MODAL);
-        JScrollPane scroll = new JScrollPane(new GUIViewProfile(e.getEmpNo()));
+        JScrollPane scroll = new JScrollPane(new GUIViewProfile(Integer.parseInt(e.getEmpNo())));
         scroll.setBorder(null);
         dialog.add(scroll);
         dialog.setSize(900, 760);
@@ -192,7 +192,7 @@ public class GUIEmployeeManager extends JPanel {
         if (e == null) {
             return;
         }
-        if (e.getEmpNo() == empNo) {
+        if (Integer.parseInt(e.getEmpNo()) == empNo) {
             JOptionPane.showMessageDialog(this, "You cannot delete your own record.", "Employees",
                     JOptionPane.WARNING_MESSAGE);
             return;
@@ -204,8 +204,8 @@ public class GUIEmployeeManager extends JPanel {
             return;
         }
         try {
-            CsvHandler.deleteEmployee(String.valueOf(e.getEmpNo()));
-            CsvHandler.deleteUser(e.getEmpNo());
+            CsvHandler.deleteEmployee(e.getEmpNo());
+            CsvHandler.deleteUser(Integer.parseInt(e.getEmpNo()));
             reload();
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "Could not delete: " + ex.getMessage(), "Employees",

@@ -21,7 +21,7 @@ public class EmployeeData {
 
     public static final int FIELD_COUNT = 17;
 
-    private int empNo;
+    private String empNo;
     private String lastName;
     private String firstName;
     private LocalDate birthday;
@@ -40,6 +40,17 @@ public class EmployeeData {
     private double clothingAllowance;
 
     public EmployeeData(int empNo, String lastName, String firstName,
+            LocalDate birthday, String address, String phone,
+            String sss, String philhealth, String tin, String pagibig,
+            String status, String position, String supervisor,
+            double basicSalary, double riceSubsidy,
+            double phoneAllowance, double clothingAllowance) {
+        this(String.valueOf(empNo), lastName, firstName, birthday, address, phone,
+                sss, philhealth, tin, pagibig, status, position, supervisor,
+                basicSalary, riceSubsidy, phoneAllowance, clothingAllowance);
+    }
+
+    public EmployeeData(String empNo, String lastName, String firstName,
             LocalDate birthday, String address, String phone,
             String sss, String philhealth, String tin, String pagibig,
             String status, String position, String supervisor,
@@ -77,14 +88,14 @@ public class EmployeeData {
                     + " fields, got " + row.length);
         }
         return new EmployeeData(
-                Integer.parseInt(row[0]), row[1], row[2],
+                row[0], row[1], row[2],
                 LocalDate.parse(row[3]), row[4], row[5],
                 row[6], row[7], row[8], row[9],
                 row[10], row[11], row[12],
-                Double.parseDouble(row[13]),
-                Double.parseDouble(row[14]),
-                Double.parseDouble(row[15]),
-                Double.parseDouble(row[16]));
+                parseMoney(row[13]),
+                parseMoney(row[14]),
+                parseMoney(row[15]),
+                parseMoney(row[16]));
     }
 
     /**
@@ -93,20 +104,24 @@ public class EmployeeData {
      */
     public String[] toCsvRow() {
         return new String[] {
-                Integer.toString(empNo), lastName, firstName,
+                empNo, lastName, firstName,
                 birthday.toString(), address, phone,
                 sss, philhealth, tin, pagibig,
                 status, position, supervisor,
-                Double.toString(basicSalary),
-                Double.toString(riceSubsidy),
-                Double.toString(phoneAllowance),
-                Double.toString(clothingAllowance)
+                formatMoney(basicSalary),
+                formatMoney(riceSubsidy),
+                formatMoney(phoneAllowance),
+                formatMoney(clothingAllowance)
         };
     }
 
     // ---------------------- Getters ----------------------
-    public int getEmpNo() {
+    public String getEmpNo() {
         return empNo;
+    }
+
+    public int getEmpNoInt() {
+        return Integer.parseInt(empNo);
     }
 
     public String getLastName() {
@@ -178,8 +193,8 @@ public class EmployeeData {
     }
 
     // ---------------------- Setters ----------------------
-    public void setEmpNo(int empNo) {
-        this.empNo = empNo;
+    public void setEmpNo(String empNo) {
+        this.empNo = requireDigits(empNo, "Employee Number");
     }
 
     public void setLastName(String lastName) {
@@ -272,7 +287,7 @@ public class EmployeeData {
     }
 
     private double requirePositive(double value, String fieldName) {
-        if (value < 0) {
+        if (Double.isNaN(value) || Double.isInfinite(value) || value < 0) {
             throw new IllegalArgumentException(fieldName + " must be non-negative");
         }
         return value;

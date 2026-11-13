@@ -194,7 +194,7 @@ public class GUIAddEmployee extends JDialog {
                     return;
                 }
                 CsvHandler.saveEmployee(e);
-                CsvHandler.saveUser(e.getEmpNo(), user, DEFAULT_PASSWORD, (String) roleBox.getSelectedItem());
+                CsvHandler.saveUser(Integer.parseInt(e.getEmpNo()), user, DEFAULT_PASSWORD, (String) roleBox.getSelectedItem());
                 JOptionPane.showMessageDialog(this, "Login created: " + user + " / " + DEFAULT_PASSWORD
                         + "\nAsk the employee to change the password.", "Employee added",
                         JOptionPane.INFORMATION_MESSAGE);

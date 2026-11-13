@@ -173,7 +173,7 @@ public class GUIPayrollManager extends JPanel {
         try {
             List<String> months = new ArrayList<>();
             for (EmployeeData e : CsvHandler.loadEmployees()) {
-                for (String m : CsvHandler.loadAttendanceMonths(e.getEmpNo())) {
+                for (String m : CsvHandler.loadAttendanceMonths(Integer.parseInt(e.getEmpNo()))) {
                     if (!months.contains(m)) {
                         months.add(m);
                     }
@@ -207,7 +207,7 @@ public class GUIPayrollManager extends JPanel {
             double net = 0;
             for (EmployeeData e : CsvHandler.loadEmployees()) {
                 PayslipData s = PayslipCalculator.compute(e,
-                        CsvHandler.loadAttendance(e.getEmpNo(), period), month, cutoff);
+                        CsvHandler.loadAttendance(Integer.parseInt(e.getEmpNo()), period), month, cutoff);
                 if (s.daysWorked() == 0) {
                     continue;
                 }

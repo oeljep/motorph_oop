@@ -139,7 +139,7 @@ public class GUIDisputeManager extends JPanel {
         try {
             names.clear();
             for (EmployeeData e : CsvHandler.loadEmployees()) {
-                names.put(e.getEmpNo(), e.getFullName());
+                names.put(Integer.parseInt(e.getEmpNo()), e.getFullName());
             }
             tickets = new ArrayList<>(CsvHandler.loadTickets());
             tickets.sort(Comparator.comparing(TicketData::isActive).reversed()
