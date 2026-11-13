@@ -152,7 +152,7 @@ public final class GuiBackendIntegrationTest {
         JTable employeeTable = findTable(managementHome.get());
         Set<Integer> directReportEmpNos = new HashSet<>();
         for (EmployeeData report : CsvHandler.findDirectReports(empNo)) {
-            directReportEmpNos.add(report.getEmpNo());
+            directReportEmpNos.add(Integer.parseInt(report.getEmpNo()));
         }
         check(employeeTable != null && employeeIds(employeeTable).equals(directReportEmpNos),
                 "Admin dashboard employee list displays only direct reports");

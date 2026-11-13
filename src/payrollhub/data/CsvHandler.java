@@ -307,8 +307,9 @@ public final class CsvHandler {
     }
 
     public static Optional<EmployeeData> findEmployee(Path path, int empNo) throws IOException {
+        String target = String.valueOf(empNo);
         for (EmployeeData e : loadEmployees(path)) {
-            if (e.getEmpNo() == empNo)
+            if (target.equals(e.getEmpNo()))
                 return Optional.of(e);
         }
         return Optional.empty();
@@ -327,7 +328,7 @@ public final class CsvHandler {
 
     private static EmployeeData toEmployeeData(Employee employee) {
         return new EmployeeData(
-                employee.getEmpNo(), employee.getLastName(), employee.getFirstName(),
+                String.valueOf(employee.getEmpNo()), employee.getLastName(), employee.getFirstName(),
                 employee.getBirthday(), employee.getAddress(), employee.getPhone(),
                 employee.getSss(), employee.getPhilhealth(), employee.getTin(), employee.getPagibig(),
                 employee.getStatus(), employee.getPosition(), employee.getSupervisor(),
@@ -367,17 +368,18 @@ public final class CsvHandler {
         }
 
         List<EmployeeData> employees = loadEmployees();
+        String supervisorKey = String.valueOf(supervisorEmpNo);
         boolean supervisorExists = employees.stream()
-                .anyMatch(employee -> employee.getEmpNo() == supervisorEmpNo);
+                .anyMatch(employee -> supervisorKey.equals(employee.getEmpNo()));
         if (!supervisorExists) {
             throw new IOException("Supervisor employee " + supervisorEmpNo + " was not found.");
         }
 
         List<EmployeeData> directReports = new ArrayList<>();
         for (EmployeeData employee : employees) {
-            if (employee.getEmpNo() != supervisorEmpNo
+            if (!supervisorKey.equals(employee.getEmpNo())
                     && findSupervisor(employee, employees)
-                            .map(supervisor -> supervisor.getEmpNo() == supervisorEmpNo)
+                            .map(supervisor -> supervisorKey.equals(supervisor.getEmpNo()))
                             .orElse(false)) {
                 directReports.add(employee);
             }

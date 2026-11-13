@@ -64,7 +64,7 @@ public final class PayslipCalculator {
         double hoursWorked = 0;
         double overtimeHours = 0;
         for (AttendanceData record : attendance) {
-            if (record == null || record.getEmpNo() != employee.getEmpNo()) {
+            if (record == null || record.getEmpNo() != Integer.parseInt(employee.getEmpNo())) {
                 throw new IllegalArgumentException("Attendance records must belong to the payslip employee.");
             }
             if (!YearMonth.from(record.getDate()).equals(month)) {
@@ -99,7 +99,7 @@ public final class PayslipCalculator {
         double tax = assessableGross == 0 ? 0 : payroll.finalWithholdingTax(taxableIncome);
         double deductions = sss + philHealth + pagIbig + tax;
 
-        return new PayslipData(employee.getEmpNo(), employee.getFullName(), employee.getPosition(),
+        return new PayslipData(Integer.parseInt(employee.getEmpNo()), employee.getFullName(), employee.getPosition(),
                 month.toString(), daysWorked, hoursWorked, lateMinutes, basic,
                 basic / MONTHLY_WORK_HOURS, grossIncome, overtimeHours, overtimePay, rice, phone, clothing, benefits,
                 sss, philHealth, pagIbig, tax, deductions, assessableGross - deductions,

@@ -163,11 +163,11 @@ public class GUILeaveManager extends JPanel {
             List<EmployeeData> employees = CsvHandler.loadEmployees();
             Set<Integer> directReportEmpNos = new HashSet<>();
             for (EmployeeData e : employees) {
-                names.put(e.getEmpNo(), e.getFullName());
+                names.put(Integer.parseInt(e.getEmpNo()), e.getFullName());
                 if (CsvHandler.findSupervisor(e, employees)
-                        .map(supervisor -> supervisor.getEmpNo() == empNo)
+                        .map(supervisor -> Integer.parseInt(supervisor.getEmpNo()) == empNo)
                         .orElse(false)) {
-                    directReportEmpNos.add(e.getEmpNo());
+                    directReportEmpNos.add(Integer.parseInt(e.getEmpNo()));
                 }
             }
             leaves = new ArrayList<>();
